@@ -126,7 +126,7 @@
  - フロントエンド：React + TypeScript
  - データベース：PostgreSQL、Supabase（ユーザー認証）
  - デプロイ先：DBはNeon、APはfly.io
- - 使用予定のライブラリ（Gem）：gemoji、simple_calendar、ransack、act_as_taggrable_on、kaminari、rubocop、Tailwind CSS
+ - 使用予定のライブラリ（Gem）：gemoji、simple_calendar、Action Mailer、ransack、act_as_taggrable_on、kaminari、rubocop、Tailwind CSS
 
 
 ## 画面遷移図
