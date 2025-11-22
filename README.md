@@ -133,6 +133,6 @@
  - https://www.figma.com/design/6topx6kEgAgX1G3thmp0Fh/%E7%94%BB%E9%9D%A2%E9%81%B7%E7%A7%BB%E5%9B%B3---%E3%81%8A%E3%82%82%E3%81%84%E3%81%A7%E3%81%A4%E3%82%80%E3%81%8E?node-id=0-1&t=o5MjIxWx1W7pI6Zt-1
 
 ## ER図
- - https://www.mermaidchart.com/app/projects/8ef929a7-6ce2-47cc-8b6d-dabfd595e0e1/diagrams/ecf9d67c-e800-4b28-aa41-99b6c51f2afa/share/invite/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkb2N1bWVudElEIjoiZWNmOWQ2N2MtZTgwMC00YjI4LWFhNDEtOTliNmM1MWYyYWZhIiwiYWNjZXNzIjoiVmlldyIsImlhdCI6MTc2Mzc3OTQ0N30.G_2iNn79CmRo4gc7pJ7UJkrSwblHA2PzwzcuChrfMTQ
- 
- [![おもいでつむぎ - ER図](https://i.gyazo.com/ccd36b067d66129664aff97f25469d48.png)](https://gyazo.com/ccd36b067d66129664aff97f25469d48)
+ - https://www.mermaidchart.com/app/projects/8ef929a7-6ce2-47cc-8b6d-dabfd595e0e1/diagrams/ecf9d67c-e800-4b28-aa41-99b6c51f2afa/share/invite/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkb2N1bWVudElEIjoiZWNmOWQ2N2MtZTgwMC00YjI4LWFhNDEtOTliNmM1MWYyYWZhIiwiYWNjZXNzIjoiVmlldyIsImlhdCI6MTc2Mzc5NzkxMn0.PmJv0CZFbV6UB6tsgOEIIEtweJsKH6pgy6HSPZCAHnU
+
+[![おもいでつむぎ - ER図](https://i.gyazo.com/420e62cdac8446a457e7946732d151c8.png)](https://gyazo.com/420e62cdac8446a457e7946732d151c8)
