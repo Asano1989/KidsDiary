@@ -2,17 +2,16 @@ FROM ruby:3.2.2
 
 WORKDIR /app
 
+RUN curl -fsSL https://deb.nodesource.com/setup_24.x | bash -
+RUN apt-get install -y nodejs
+RUN npm uninstall yarn -g
+RUN npm install yarn -g -y
+RUN yarn add react react-dom
+
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile
+
 COPY Gemfile Gemfile.lock /app/
 RUN bundle install
 
 COPY . /app/
-
-RUN curl -fsSL https://deb.nodesource.com/setup_24.x | bash -
-RUN apt-get install -y nodejs
-
-COPY entrypoint.sh /usr/bin/
-RUN chmod +x /usr/bin/entrypoint.sh
-
-ENTRYPOINT ["entrypoint.sh"]
-
-CMD ["rails", "server", "-b", "0.0.0.0"]
