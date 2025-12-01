@@ -3,7 +3,7 @@ services:
   db:
     image: postgres:17.7
     environment:
-      POSTGRES_DB: testdb
+      POSTGRES_DB: db
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
     volumes:
