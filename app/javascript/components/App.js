@@ -1,7 +1,12 @@
 import React from "react";
 
 const App = () => {
-  return <h1>Sample React (App.jsx)</h1>;
+  return (
+    <>
+      <p class="text-3xl font-bold underline">Sample React (App.jsx)</p>
+      <button class="bg-gray-900 hover:bg-gray-800 text-white rounded px-4 py-2">tailwind</button>
+    </>
+  )
 };
 
 export default App;
