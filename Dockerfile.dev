@@ -8,6 +8,9 @@ RUN npm uninstall yarn -g
 RUN npm install yarn -g -y
 RUN yarn add react react-dom
 
+RUN apt-get update
+RUN apt-get install -y vim
+
 COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile
 
