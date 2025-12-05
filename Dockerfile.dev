@@ -6,7 +6,9 @@ RUN curl -fsSL https://deb.nodesource.com/setup_24.x | bash -
 RUN apt-get install -y nodejs
 RUN npm uninstall yarn -g
 RUN npm install yarn -g -y
-RUN yarn add react react-dom
+
+RUN yarn cache clean && yarn add react react-dom
+RUN yarn add @supabase/supabase-js
 
 RUN apt-get update
 RUN apt-get install -y vim
