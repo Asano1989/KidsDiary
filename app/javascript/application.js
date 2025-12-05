@@ -4,7 +4,7 @@ import "./controllers"
 
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./react/components/App";
+import App from "./react/pages/App";
 
 document.addEventListener("DOMContentLoaded", () => {
   const root = document.getElementById("root");
