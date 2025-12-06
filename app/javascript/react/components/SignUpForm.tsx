@@ -1,91 +1,134 @@
-import React, { useState, FormEvent } from 'react';
-import { supabase } from '../supabaseClient'; // 仮のパス -> src/supabaseClient.tsを指す
+import React, { useState } from 'react';
+import { supabase } from '../supabaseClient';
 
-// 親コンポーネントから表示を切り替えるためのコールバックを受け取る
 interface SignUpFormProps {
-  onToggleForm: () => void;
+  onSuccess: () => void;
+  onNavigate: (view: 'signin') => void;
 }
 
-const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleForm }) => {
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [loading, setLoading] = useState<boolean>(false);
-  const [message, setMessage] = useState<string>('');
+const SignUpForm: React.FC<SignUpFormProps> = ({ onSuccess, onNavigate }) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [birthday, setBirthday] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
 
-  const handleSignUp = async (e: FormEvent<HTMLFormElement>) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setMessage('');
+    setError('');
 
     try {
-      // Supabaseでユーザーを登録
-      const { error } = await supabase.auth.signUp({
-        email: email,
-        password: password,
+      // Supabaseの新規登録メソッド
+      // 🚨 変更: dataオプションを追加し、名前と誕生日をユーザーメタデータとして保存します。
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+      }, {
+        data: {
+          full_name: name,
+          birthday: birthday,
+        }
       });
 
-      if (error) {
-        setMessage(`エラー: ${error.message}`);
-      } else {
-        setMessage('登録が完了しました。認証メールを確認してください。');
-        setEmail(''); // フォームをクリア
-        setPassword('');
+      if (signUpError) {
+        throw signUpError;
       }
+
+      // サインアップが成功しても、メール確認が必須の場合はセッションは得られない
+      if (data.user) {
+        setMessage('登録に成功しました。ログインしてください。');
+        onNavigate('signin');
+      } else {
+        setMessage('確認メールを送信しました。メール内のリンクをクリックして登録を完了してください。');
+        setEmail('');
+        setPassword('');
+        // フォームをリセット
+        setName('');
+        setBirthday('');
+      }
+      onSuccess();
+
     } catch (err) {
-      setMessage('予期せぬエラーが発生しました。');
-      console.error(err);
+      console.error('Sign Up Error:', err);
+      setError(err instanceof Error ? err.message : '登録中にエラーが発生しました。');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="p-8 max-w-md mx-auto bg-white shadow-xl rounded-lg">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">新規ユーザー登録</h2>
+    <form onSubmit={handleSignUp} className="bg-white p-6 shadow-md rounded-lg space-y-4">
+      <h2 className="text-2xl font-bold text-gray-800">新規登録</h2>
       
-      <form onSubmit={handleSignUp} className="space-y-4">
+      {message && <p className="text-sm text-green-600 p-2 bg-green-50 rounded">{message}</p>}
+      {error && <p className="text-sm text-red-600 p-2 bg-red-50 rounded">{error}</p>}
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="email">メールアドレス</label>
         <input
+          id="email"
           type="email"
-          placeholder="メールアドレス"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+          className="w-full p-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
         />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="password">パスワード</label>
         <input
+          id="password"
           type="password"
-          placeholder="パスワード (6文字以上)"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+          className="w-full p-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
         />
-        <button 
-          type="submit" 
-          disabled={loading}
-          className={`w-full p-3 text-white font-semibold rounded-lg transition duration-150 ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
-        >
-          {loading ? '登録中...' : '登録する'}
-        </button>
-      </form>
+      </div>
 
-      {message && (
-        <p className={`mt-4 p-2 text-center rounded ${message.startsWith('エラー') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
-          {message}
-        </p>
-      )}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="name">名前</label>
+        <input
+          id="name"
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+          className="w-full p-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+        />
+      </div>
 
-      <p className="mt-6 text-center text-sm text-gray-600">
-        アカウントをお持ちの場合は 
-        <button 
-          type="button" 
-          onClick={onToggleForm}
-          className="text-blue-600 hover:text-blue-800 font-medium ml-1"
-        >
-          ログイン
-        </button>
-      </p>
-    </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="birthday">誕生日</label>
+        <input
+          id="birthday"
+          type="date"
+          value={birthday}
+          onChange={(e) => setBirthday(e.target.value)}
+          className="w-full p-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+        />
+      </div>
+
+      <button
+        type="submit"
+        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-lg transition duration-200 disabled:bg-indigo-400"
+        disabled={loading}
+      >
+        {loading ? '登録中...' : '登録'}
+      </button>
+
+      <button
+        type="button"
+        onClick={() => onNavigate('signin')}
+        className="w-full text-sm text-indigo-600 hover:text-indigo-800 mt-2"
+      >
+        すでにアカウントをお持ちの方はこちら (ログイン)
+      </button>
+    </form>
   );
 };
 

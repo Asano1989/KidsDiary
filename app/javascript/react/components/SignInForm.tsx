@@ -1,98 +1,99 @@
-import React, { useState, FormEvent } from 'react';
+import React, { useState } from 'react';
 import { supabase } from '../supabaseClient';
 
 interface SignInFormProps {
-  onToggleForm: () => void;
-  // ログイン成功時にホーム画面などへリダイレクトするための関数
-  onSignInSuccess: (jwtToken: string) => void;
+  onSuccess: () => void;
+  onNavigate: (view: 'signup') => void;
 }
 
-const SignInForm: React.FC<SignInFormProps> = ({ onToggleForm, onSignInSuccess }) => {
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [loading, setLoading] = useState<boolean>(false);
-  const [message, setMessage] = useState<string>('');
+const SignInForm: React.FC<SignInFormProps> = ({ onSuccess, onNavigate }) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSignIn = async (e: FormEvent<HTMLFormElement>) => {
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setMessage('');
+    setError('');
 
     try {
-      // Supabaseでログイン
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: email,
-        password: password,
+      // Supabaseのログインメソッド
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
 
-      if (error) {
-        setMessage(`ログインエラー: ${error.message}`);
-      } else if (data.session) {
-        // ログイン成功
-        setMessage('ログインに成功しました...');
-        
-        // 外部で定義された連携処理と成功後のリダイレクトを実行
-        // data.session.access_token (JWT) を渡す
-        onSignInSuccess(data.session.access_token);
-        
-      } else {
-        setMessage('予期せぬエラーが発生しました。');
+      if (signInError) {
+        throw signInError;
       }
+      
+      // 成功した場合、App.tsxのonAuthStateChangeリスナーがセッションを更新します
+      onSuccess();
+      
     } catch (err) {
-      setMessage('予期せぬエラーが発生しました。');
-      console.error(err);
+      console.error('Sign In Error:', err);
+      setError(err instanceof Error ? err.message : 'ログイン中にエラーが発生しました。');
     } finally {
       setLoading(false);
     }
   };
 
+  const handleOAuthSignIn = (provider: 'github' | 'google') => {
+    // ソーシャルログイン
+    supabase.auth.signInWithOAuth({ provider });
+  };
+
   return (
-    <div className="p-8 max-w-md mx-auto bg-white shadow-xl rounded-lg">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">ログイン</h2>
+    <form onSubmit={handleSignIn} className="bg-white p-6 shadow-md rounded-lg space-y-4">
+      <h2 className="text-2xl font-bold text-gray-800">ログイン</h2>
       
-      <form onSubmit={handleSignIn} className="space-y-4">
+      {error && <p className="text-sm text-red-600 p-2 bg-red-50 rounded">{error}</p>}
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="email">メールアドレス</label>
         <input
+          id="email"
           type="email"
-          placeholder="メールアドレス"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+          className="w-full p-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
         />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="password">パスワード</label>
         <input
+          id="password"
           type="password"
-          placeholder="パスワード"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+          className="w-full p-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
         />
-        <button 
-          type="submit" 
-          disabled={loading}
-          className={`w-full p-3 text-white font-semibold rounded-lg transition duration-150 ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}`}
-        >
-          {loading ? '認証中...' : 'ログイン'}
-        </button>
-      </form>
+      </div>
+      <button
+        type="submit"
+        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-lg transition duration-200 disabled:bg-indigo-400"
+        disabled={loading}
+      >
+        {loading ? 'ログイン中...' : 'ログイン'}
+      </button>
 
-      {message && (
-        <p className={`mt-4 p-2 text-center rounded ${message.startsWith('エラー') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
-          {message}
-        </p>
-      )}
+      <div className="flex items-center space-x-2 my-4">
+        <hr className="flex-grow border-gray-300" />
+        <span className="text-sm text-gray-500">または</span>
+        <hr className="flex-grow border-gray-300" />
+      </div>
 
-      <p className="mt-6 text-center text-sm text-gray-600">
-        アカウントをお持ちでない場合は 
-        <button 
-          type="button" 
-          onClick={onToggleForm}
-          className="text-green-600 hover:text-green-800 font-medium ml-1"
-        >
-          新規登録
-        </button>
-      </p>
-    </div>
+      <button
+        type="button"
+        onClick={() => onNavigate('signup')}
+        className="w-full text-sm text-indigo-600 hover:text-indigo-800 mt-2"
+      >
+        アカウントをお持ちでない方はこちら (新規登録)
+      </button>
+    </form>
   );
 };
 
