@@ -2,31 +2,29 @@ import React, { useState } from 'react';
 import { supabase } from '../supabaseClient';
 
 interface SignUpFormProps {
-  onSuccess: () => void;
-  onNavigate: (view: 'signin') => void;
+  onToggleForm: () => void; // ログイン/登録切り替え用
 }
 
-// ユーザーのセッション確立を待機するヘルパー関数
-const waitForSession = async (maxAttempts = 5, delay = 1000) => {
-  for (let i = 0; i < maxAttempts; i++) {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) {
-      return session.user;
-    }
-    await new Promise(resolve => setTimeout(resolve, delay));
-  }
-  return null;
-};
-
-const SignUpForm: React.FC<SignUpFormProps> = ({ onSuccess, onNavigate }) => {
+const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleForm }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
-  const [birthday, setBirthday] = useState(''); 
+  const [passwordConfirm, setPasswordConfirm] = useState(''); // パスワード確認
+  const [displayName, setDisplayName] = useState(''); // 表示名 (変更)
+  const [birthday, setBirthday] = useState(''); // 誕生日（任意）
   
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+
+  // パスワード確認用ヘルパー関数 (既存ロジックから簡略化)
+  const waitForSession = async (maxAttempts = 5, delay = 1000) => {
+    for (let i = 0; i < maxAttempts; i++) {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) return session.user;
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+    return null;
+  };
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,69 +32,49 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSuccess, onNavigate }) => {
     setMessage('');
     setError('');
 
-    if (!name.trim()) {
-      setError('名前は必須入力です。');
+    if (password !== passwordConfirm) {
+      setError('パスワードが一致しません。');
       setLoading(false);
       return;
     }
 
     try {
-      // 1. Supabaseでユーザー登録を実行 (カスタムデータは渡さない)
-      const { error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-      });
+      // 1. Supabaseでユーザー登録を実行
+      const { error: signUpError } = await supabase.auth.signUp({ email, password });
 
-      if (signUpError) {
-        throw signUpError;
-      }
+      if (signUpError) throw signUpError;
       
-      // 2. メール確認が有効な場合、確認メッセージを表示して終了
-      // 注意: メール確認がない場合、この後のロジックが実行されます
-      setMessage('確認メールを送信しました。メール内のリンクをクリックして登録を完了してください。');
-      
-      // 3. メール確認がない環境（またはテスト環境）で即時ログインが発生した場合の処理
+      // 2. プロファイルデータ（表示名、誕生日）をProfilesテーブルに登録
       const user = await waitForSession();
       
       if (user) {
-        // 認証セッションが確立されたことを確認してから profiles への挿入を試みる
         const { error: profileError } = await supabase
           .from('profiles')
           .insert([
             {
-              id: user.id, // 認証ユーザーのIDと一致させる
-              name: name.trim(), // profiles.name に格納
-              birthday: birthday || null, 
+              id: user.id,
+              name: displayName.trim(),
+              birthday: birthday || null,
             },
           ]);
         
         if (profileError) {
-          console.error("Profile creation failed (RLS/Timing issue):", profileError);
-          // 認証は成功しているため、ユーザーには成功を伝えるが、
-          // 開発者にはエラーを通知する
-          throw new Error('ユーザー認証は完了しましたが、プロファイル作成に失敗しました。'); 
+          console.error("Profile creation failed:", profileError);
+          throw new Error('ユーザー認証は完了しましたが、プロファイル作成に失敗しました。');
         }
 
-        // 4. 全ての処理が成功
-        setMessage('登録に成功しました。ログインしてください。');
-        onNavigate('signin');
-
+        // 3. 全ての処理が成功
+        setMessage('登録に成功しました。ログイン画面へ移動します。');
+        onToggleForm(); // ログイン画面へ遷移
+        
       } else {
         // メール検証が必要でセッションが確立されていない場合
         setMessage('確認メールを送信しました。メール内のリンクをクリックして登録を完了してください。');
       }
 
-      // フォームをリセット
-      setEmail('');
-      setPassword('');
-      setName('');
-      setBirthday('');
-      onSuccess();
-
     } catch (err) {
       console.error('Sign Up Error:', err);
-      // RLS/Timing issue のメッセージはユーザーには見せない
-      setError('登録中にエラーが発生しました。詳細はコンソールを確認してください。');
+      setError('登録中にエラーが発生しました。');
     } finally {
       setLoading(false);
     }
@@ -104,25 +82,12 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSuccess, onNavigate }) => {
 
   return (
     <form onSubmit={handleSignUp} className="bg-white p-6 shadow-md rounded-lg space-y-4">
-      <h2 className="text-2xl font-bold text-gray-800">新規登録</h2>
+      <h2 className="text-xl font-bold text-gray-800">ユーザー登録</h2>
       
-      {message && <p className="text-sm text-green-600 p-2 bg-green-50 rounded">{message}</p>}
+      {message && <p className="text-sm text-gray-700 p-2 bg-gray-100 rounded">{message}</p>}
       {error && <p className="text-sm text-red-600 p-2 bg-red-50 rounded">{error}</p>}
 
-      {/* 🔽 名前入力フィールド (必須) */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="name">名前</label>
-        <input
-          id="name"
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-          className="w-full p-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
-        />
-      </div>
-
-      {/* ... メールアドレスとパスワード ... */}
+      {/* メールアドレス */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="email">メールアドレス</label>
         <input
@@ -131,9 +96,11 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSuccess, onNavigate }) => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="w-full p-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+          className="w-full p-2 border border-gray-400 rounded-lg focus:ring-gray-600 focus:border-gray-600"
         />
       </div>
+
+      {/* パスワード */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="password">パスワード</label>
         <input
@@ -142,11 +109,37 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSuccess, onNavigate }) => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          className="w-full p-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+          className="w-full p-2 border border-gray-400 rounded-lg focus:ring-gray-600 focus:border-gray-600"
         />
       </div>
 
-      {/* 🔽 誕生日入力フィールド (任意) */}
+      {/* パスワード（確認） */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="passwordConfirm">パスワード（確認）</label>
+        <input
+          id="passwordConfirm"
+          type="password"
+          value={passwordConfirm}
+          onChange={(e) => setPasswordConfirm(e.target.value)}
+          required
+          className="w-full p-2 border border-gray-400 rounded-lg focus:ring-gray-600 focus:border-gray-600"
+        />
+      </div>
+
+      {/* 表示名 */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="displayName">表示名</label>
+        <input
+          id="displayName"
+          type="text"
+          value={displayName}
+          onChange={(e) => setDisplayName(e.target.value)}
+          required
+          className="w-full p-2 border border-gray-400 rounded-lg focus:ring-gray-600 focus:border-gray-600"
+        />
+      </div>
+
+      {/* 誕生日（任意） */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="birthday">誕生日 (任意)</label>
         <input
@@ -154,25 +147,17 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSuccess, onNavigate }) => {
           type="date"
           value={birthday}
           onChange={(e) => setBirthday(e.target.value)}
-          className="w-full p-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+          className="w-full p-2 border border-gray-400 rounded-lg focus:ring-gray-600 focus:border-gray-600"
         />
       </div>
 
-      {/* ... 既存のボタン ... */}
+      {/* 登録ボタン */}
       <button
         type="submit"
-        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded-lg transition duration-200 disabled:bg-indigo-400"
+        className="w-full bg-gray-800 hover:bg-gray-700 text-white font-semibold py-2 rounded-lg transition duration-200 disabled:bg-gray-400"
         disabled={loading}
       >
         {loading ? '登録中...' : '登録'}
-      </button>
-
-      <button
-        type="button"
-        onClick={() => onNavigate('signin')}
-        className="w-full text-sm text-indigo-600 hover:text-indigo-800 mt-2"
-      >
-        すでにアカウントをお持ちの方はこちら (ログイン)
       </button>
     </form>
   );
