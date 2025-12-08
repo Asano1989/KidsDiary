@@ -17,6 +17,8 @@ services:
       - "35729:35729"
     stdin_open: true
     tty: true
+    env_file:
+      - .env.development
     depends_on:
       - db
     command: /bin/bash -c "bin/rails db:create db:migrate 2>/dev/null || true && rm -f tmp/pids/server.pid && bin/dev"
@@ -24,4 +26,4 @@ services:
       - .:/app
 
 volumes:
-  db-data: {}
+  db-data:
