@@ -1,24 +1,36 @@
-class Api::V1::UsersController < ApplicationController
-  # 認証済み（JWTが有効）であることを保証
-  before_action :authenticate_user_from_token
-  
-  # POST /api/v1/users/sync
-  def sync
-    # ユーザーが独自DBにまだ存在しない場合のみ作成
-    unless user_signed_in?
-      # JWT検証成功時に設定された @current_supabase_uid を使用
-      user = User.new(supabase_uid: @current_supabase_uid)
-      
-      if user.save
-        # 成功: 独自DBにユーザーレコードを作成
-        render json: { message: 'User synchronized successfully' }, status: :created
-      else
-        # 失敗: バリデーションエラーなど
-        render json: { errors: user.errors.full_messages }, status: :unprocessable_entity
+module Api
+  module V1
+    class UsersController < ApplicationController
+      # JWT検証が成功した場合のみ、このアクションを実行
+      # @current_user_payload にJWTペイロード（Supabaseユーザー情報）が格納される
+      before_action :authenticate_user! 
+
+      # POST /api/v1/users/register_on_rails
+      def register_on_rails
+        # JWTペイロードから SupabaseユーザーID (sub) を安全に抽出
+        supabase_uid = @current_user_payload['sub']
+
+        # ユーザーIDがない場合はエラー
+        unless supabase_uid.present?
+          return render json: { error: 'Missing Supabase user ID (sub).' }, status: :unprocessable_entity
+        end
+
+        # User.find_or_create_by! を利用して、存在しない場合は作成し、存在するなら取得する
+        @user = User.find_or_create_by!(supabase_uid: supabase_uid) do |user|
+          # 初回作成時のみ、JWTに含まれるemailなどを設定
+          user.email = @current_user_payload['email'] if @current_user_payload['email'].present?
+        end
+
+        # 成功レスポンス
+        render json: {
+          message: 'User successfully linked.',
+          user: { id: @user.id, supabase_uid: @user.supabase_uid }
+        }, status: :ok
+        
+      rescue ActiveRecord::RecordInvalid => e
+        # バリデーションエラーなど、DB操作上の問題が発生した場合
+        render json: { error: "Failed to link user: #{e.message}" }, status: :unprocessable_entity
       end
-    else
-      # ユーザーは既に存在している場合（2回目以降のアクセス）
-      render json: { message: 'User already synchronized' }, status: :ok
     end
   end
 end
