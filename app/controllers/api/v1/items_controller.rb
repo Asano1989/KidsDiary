@@ -6,18 +6,10 @@ module Api
       
       # GET /api/v1/items
       def index
-        # JWTから取得したユーザーID（subクレーム）をログに出力
-        user_id = @current_user_payload['sub']
-        
-        Rails.logger.info "Authenticated User ID: #{user_id}"
-
-        # 認証済みユーザーにのみ表示されるダミーデータを返す
+        # 認証済みであることのみを伝える最小限のレスポンスに変更
         render json: {
-          message: "Successfully fetched authenticated data.",
-          user_id: user_id,
-          items: [
-            { id: 1, name: "Secret Item A" }
-          ]
+          authenticated: true, # 認証に成功したことだけを示す
+          # user_id: @current_user_payload['sub'] # IDは必要なければ削除
         }, status: :ok
       end
     end
