@@ -3,12 +3,20 @@ import "@hotwired/turbo-rails"
 import "./controllers"
 
 import React from "react";
-import ReactDOM from "react-dom/client";
+import { createRoot } from "react-dom/client";
 import App from "./react/pages/App";
 
-document.addEventListener("DOMContentLoaded", () => {
-  const root = document.getElementById("root");
-  if (root) {
-    ReactDOM.createRoot(root).render(<App />);
+// 💡 認証ページをレンダリングする関数を定義
+function initializeReactApp() {
+  const container = document.getElementById("root");
+  
+  if (container) {
+    createRoot(container).render(<App />);
   }
-});
+}
+
+// 1. ページがフルロードされたとき
+document.addEventListener('DOMContentLoaded', initializeReactApp);
+
+// 2. 💡 Turboによるページ遷移が完了したとき
+document.addEventListener('turbo:load', initializeReactApp);

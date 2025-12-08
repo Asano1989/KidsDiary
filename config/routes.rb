@@ -1,7 +1,7 @@
 Rails.application.routes.draw do
   root 'top#index'
 
-  get 'home', to: 'home#index'
+  get 'auth', to: 'auth#index'
     
   # APIエンドポイントの定義
   namespace :api do
