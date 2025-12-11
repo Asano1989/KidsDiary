@@ -16,16 +16,25 @@ const useAuthLogic = () => {
   const [loading, setLoading] = useState(true);
 
   // ログイン成功時にRails DBとの連携とユーザープロファイルの取得を実行
-  const handleAuthSuccess = useCallback(async (jwtToken: string) => {
-    console.log('認証成功。Rails連携とプロファイル取得を開始します。');
+  const handleAuthSuccess = useCallback(async (jwtToken: string, displayName?: string, birthdayValue?: string) => {
     
     // 1. Rails連携（/api/v1/users/register_on_rails へPOST）
+    const body: { user?: { name?: string, birthday?: string } } = {};
+    
+    if (displayName || birthdayValue) {
+        body.user = {};
+        // trim() が原因で空文字列になる可能性もあるため、今回はよりシンプルに確認
+        if (displayName) body.user.name = displayName;
+        if (birthdayValue) body.user.birthday = birthdayValue;
+    }
+
     const response = await fetch('/api/v1/users/register_on_rails', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${jwtToken}`,
       },
+      body: JSON.stringify(body),
     });
 
     if (!response.ok) {
@@ -38,19 +47,44 @@ const useAuthLogic = () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('name')
-      .eq('id', user.id)
-      .single();
+    // 💥 修正：Profilesテーブルへの書き込みを待機するために、ループで再試行するロジックを追加
+    const MAX_ATTEMPTS = 3;
+    const DELAY_MS = 1000;
+    let profile: any = null;
+    let profileError: any = null;
+
+    for (let i = 0; i < MAX_ATTEMPTS; i++) {
+        const result = await supabase
+            .from('profiles')
+            .select('name')
+            .eq('id', user.id)
+            .single();
+        
+        profile = result.data;
+        profileError = result.error;
+
+        if (profile) {
+            // データ取得成功
+            break;
+        }
+
+        if (profileError && profileError.code === 'PGRST116' && i < MAX_ATTEMPTS - 1) {
+            // エラーコード PGRST116 (0 rows) の場合、少し待って再試行
+            console.log(`Profiles情報が見つかりません。${DELAY_MS}ms待機して再試行します (${i + 1}/${MAX_ATTEMPTS})。`);
+            await new Promise(resolve => setTimeout(resolve, DELAY_MS));
+        } else {
+            // それ以外のエラーまたは最終試行で失敗
+            break;
+        }
+    }
 
     if (profileError || !profile) {
-      console.error('プロファイル取得失敗:', profileError);
-      // profilesテーブルにデータがない場合のフォールバック（メールアドレスを表示名とする）
-      setUserProfile({ name: user.email || '名無し', supabaseUid: user.id });
-      return;
+        console.error('プロファイル取得失敗:', profileError);
+        // 最終的なフォールバック（メールアドレスを表示名とする）
+        setUserProfile({ name: user.email || '名無し', supabaseUid: user.id });
+        return;
     }
-    
+
     // 成功: 取得した表示名を設定
     setUserProfile({ name: profile.name, supabaseUid: user.id });
 
@@ -98,12 +132,17 @@ const useAuthLogic = () => {
     setLoading(false);
   };
 
-  return { session, userProfile, loading, handleSignOut };
+  return {
+    session,
+    userProfile,
+    loading,
+    handleSignOut,
+    handleAuthSuccess
+  };
 };
 
-
 const AuthPage: React.FC = () => {
-  const { session, userProfile, loading, handleSignOut } = useAuthLogic();
+  const { session, userProfile, loading, handleSignOut, handleAuthSuccess } = useAuthLogic();
   
   // true: サインインフォームを表示, false: サインアップフォームを表示
   const [isSignIn, setIsSignIn] = useState<boolean>(true);
@@ -142,15 +181,25 @@ const AuthPage: React.FC = () => {
   // --- ログイン/登録フォームの表示 ---
   return (
     <div className="w-full max-w-md mx-auto">
-      {isSignIn ? (
-        <SignInForm
-          onToggleForm={() => setIsSignIn(false)}
-        />
-      ) : (
-        <SignUpForm
-          onToggleForm={() => setIsSignIn(true)}
-        />
-      )}
+        {isSignIn ? (
+          <SignInForm
+            onToggleForm={() => setIsSignIn(false)}
+          />
+        ) : (
+          <SignUpForm 
+            onToggleForm={(displayName, birthdayValue) => {
+              setIsSignIn(true);
+
+              // 💥 修正: セッションを再取得し、取得できたら公開された handleAuthSuccess を呼び出す
+              supabase.auth.getSession().then(({ data: { session: newSession } }) => {
+                if (newSession) {
+                  // ここで AuthPage のスコープにある handleAuthSuccess を使う
+                  handleAuthSuccess(newSession.access_token, displayName, birthdayValue);
+                }
+              });
+            }}
+          />
+        )}
       {/* フォーム切り替えボタンを外部に出し、SignInForm/SignUpFormから削除 */}
       <div className="mt-4 text-center">
         <button
