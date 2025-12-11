@@ -9,14 +9,14 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleForm }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState(''); // パスワード確認
-  const [displayName, setDisplayName] = useState(''); // 表示名 (変更)
+  const [displayName, setDisplayName] = useState(''); // 表示名
   const [birthday, setBirthday] = useState(''); // 誕生日（任意）
   
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
-  // パスワード確認用ヘルパー関数 (既存ロジックから簡略化)
+  // パスワード確認用ヘルパー関数
   const waitForSession = async (maxAttempts = 5, delay = 1000) => {
     for (let i = 0; i < maxAttempts; i++) {
       const { data: { session } } = await supabase.auth.getSession();
