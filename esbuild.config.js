@@ -15,11 +15,8 @@ const watch = process.argv.includes('--watch');
 // ====================================================================
 const define = {};
 for (const key in process.env) {
-  // フロントエンドで使用する SUPABASEを含む変数のみを対象とする
-  if (key.includes('SUPABASE')) {
-    // 🚨 重要なポイント: process.env.<KEY> を、その値の文字列に置き換える
-    define[`process.env.${key}`] = JSON.stringify(process.env[key]);
-  }
+  // 重要なポイント: process.env.<KEY> を、その値の文字列に置き換える
+  define[`process.env.${key}`] = JSON.stringify(process.env[key]);
 }
 
 // ====================================================================
