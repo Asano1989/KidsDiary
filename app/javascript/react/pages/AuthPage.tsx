@@ -1,124 +1,151 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { supabase } from '../supabaseClient';
+import { supabase, Session, AuthChangeEvent } from '../supabaseClient';
 import SignUpForm from '../components/SignUpForm';
 import SignInForm from '../components/SignInForm';
 
-// Supabaseセッションとユーザー情報を保持する型
 interface UserProfile {
   name: string;
   supabaseUid: string;
 }
 
-// 認証ロジックと状態管理のためのカスタムフック
+type AuthSuccessParams = {
+    session: Session;
+    displayName?: string;
+    birthdayValue?: string;
+}
+
 const useAuthLogic = () => {
-  const [session, setSession] = useState<any>(null); // Supabaseセッション
+  const [session, setSession] = useState<Session | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const [railsSynced, setRailsSynced] = useState(false);
+
   // ログイン成功時にRails DBとの連携とユーザープロファイルの取得を実行
-  const handleAuthSuccess = useCallback(async (jwtToken: string, displayName?: string, birthdayValue?: string) => {
+  const handleAuthSuccess = useCallback(async ({ session, displayName, birthdayValue }: AuthSuccessParams) => {
+    if (railsSynced) return;
     
-    // 1. Rails連携（/api/v1/users/register_on_rails へPOST）
-    const body: { user?: { name?: string, birthday?: string } } = {};
-    
-    if (displayName || birthdayValue) {
-        body.user = {};
-        // trim() が原因で空文字列になる可能性もあるため、今回はよりシンプルに確認
-        if (displayName) body.user.name = displayName;
-        if (birthdayValue) body.user.birthday = birthdayValue;
-    }
-
-    const response = await fetch('/api/v1/users/register_on_rails', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${jwtToken}`,
-      },
-      body: JSON.stringify(body),
-    });
-
-    if (!response.ok) {
-      console.error('Rails連携失敗:', await response.json());
-      // 致命的なエラーではないため、ユーザーには通知せずログのみ
+    if (!session || !session.user) {
+      // セッションまたはユーザー情報がない場合は処理を中断
+      console.error("Supabase Session or User is missing (in handleAuthSuccess).");
       return;
     }
 
-    // 2. Supabaseからprofilesテーブルの表示名を取得
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    // 1. Rails連携（/api/v1/users/register_on_rails へPOST）
+    // リクエストボディにsupabase_uidとemailを常に含め、displayName/birthdayValueは存在する場合のみ含める
+    const body: { user: { supabase_uid: string, email: string | undefined, name?: string, birthday?: string } } = {
+        user: {
+            supabase_uid: session.user.id,
+            email: session.user.email,
+        }
+    };
 
-    // 💥 修正：Profilesテーブルへの書き込みを待機するために、ループで再試行するロジックを追加
-    const MAX_ATTEMPTS = 3;
-    const DELAY_MS = 1000;
-    let profile: any = null;
-    let profileError: any = null;
+    if (displayName) body.user.name = displayName;
+    if (birthdayValue) body.user.birthday = birthdayValue;
 
-    for (let i = 0; i < MAX_ATTEMPTS; i++) {
+    const RAIL_API_BASE = process.env.REACT_APP_RAILS_API_BASE_URL;
+
+    try {
+      const response = await fetch(`${RAIL_API_BASE}/api/v1/users/register_on_rails`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+        },
+        // body オブジェクト全体を渡す
+        body: JSON.stringify(body),
+      });
+
+      if (!response.ok) {
+        console.error('Rails連携失敗:', await response.json());
+        return;
+      }
+
+      // Rails連携成功時にフラグを立てる
+      setRailsSynced(true);
+
+      // 2. Supabaseからprofilesテーブルの表示名を取得
+      // handleAuthSuccess の外で最新のセッションを取得する必要はない
+      const user = session.user; // 引数の session を使用
+
+      // 3. Profiles取得
+      const MAX_ATTEMPTS = 5;
+      const DELAY_MS = 500;
+      let profile: any = null;
+      let profileError: any = null;
+
+      for (let i = 0; i < MAX_ATTEMPTS; i++) {
         const result = await supabase
-            .from('profiles')
-            .select('name')
-            .eq('id', user.id)
-            .single();
-        
+          .from('profiles')
+          .select('name')
+          .eq('id', user.id)
+          .single();
+
         profile = result.data;
         profileError = result.error;
 
         if (profile) {
-            // データ取得成功
             break;
         }
 
+        // 406 (0 rows) の場合のみ再試行
         if (profileError && profileError.code === 'PGRST116' && i < MAX_ATTEMPTS - 1) {
-            // エラーコード PGRST116 (0 rows) の場合、少し待って再試行
-            console.log(`Profiles情報が見つかりません。${DELAY_MS}ms待機して再試行します (${i + 1}/${MAX_ATTEMPTS})。`);
-            await new Promise(resolve => setTimeout(resolve, DELAY_MS));
+          await new Promise(resolve => setTimeout(resolve, DELAY_MS));
         } else {
-            // それ以外のエラーまたは最終試行で失敗
-            break;
+          break;
         }
-    }
+      }
 
-    if (profileError || !profile) {
-        console.error('プロファイル取得失敗:', profileError);
-        // 最終的なフォールバック（メールアドレスを表示名とする）
+      if (profileError || !profile) {
+        console.error('最終的にプロファイル取得失敗:', profileError);
         setUserProfile({ name: user.email || '名無し', supabaseUid: user.id });
         return;
+      }
+
+      // 成功: 取得した表示名を設定
+      setUserProfile({ name: profile.name, supabaseUid: user.id });
+
+    } catch (error) {
+      console.error('Auth Success 処理中に予期せぬエラー:', error);
     }
+  }, [railsSynced, setRailsSynced, setUserProfile]);
 
-    // 成功: 取得した表示名を設定
-    setUserProfile({ name: profile.name, supabaseUid: user.id });
 
-  }, []);
-
-  // Supabaseのセッション変更を監視
   useEffect(() => {
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+    // 1. Supabaseのイベントリスナー
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event: AuthChangeEvent, session: Session | null) => {
         setSession(session);
+        // ロード処理を分離
         setLoading(false);
-        
-        if (session && event === 'SIGNED_IN') {
-          // ログイン時のみRails連携/プロファイル取得を実行
-          handleAuthSuccess(session.access_token);
-        } else if (event === 'SIGNED_OUT') {
-          // ログアウト時はプロファイルをリセット
-          setUserProfile(null);
+          
+          if (session) {
+            if (event === 'SIGNED_IN' || event === 'SIGNED_UP') {
+              // session のみを渡す (displayName/birthdayValueは空)
+              handleAuthSuccess({ session });
+            }
+          }
         }
-      }
-    );
+      );
 
-    // 初期セッションの確認
+    // 2. 初期セッションの確認（ページロード時）
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
       if (session) {
-        handleAuthSuccess(session.access_token);
+        // セッションが存在する場合のみ呼び出す
+        handleAuthSuccess({ session });
       }
+      // ロード完了
       setLoading(false);
+      
+      return () => {
+        authListener.subscription.unsubscribe();
+      };
     });
 
     return () => {
-      listener.subscription.unsubscribe();
+      authListener.subscription.unsubscribe();
     };
+     // 依存配列に handleAuthSuccess は必須
   }, [handleAuthSuccess]);
 
   // ログアウト処理
@@ -148,7 +175,6 @@ const AuthPage: React.FC = () => {
   const [isSignIn, setIsSignIn] = useState<boolean>(true);
 
   if (loading) {
-    // ロード中の最小表示
     return (
       <div className="min-h-screen flex items-center justify-center text-gray-700">
         ロード中...
@@ -156,9 +182,9 @@ const AuthPage: React.FC = () => {
     );
   }
 
-  // --- ログイン後の表示（要件に基づきシンプル化） ---
+  // --- ログイン後の表示 ---
   if (session) {
-    // 表示名の優先順位: 1. profiles.name 2. Supabaseユーザーのメールアドレス 3. 'ユーザー'
+    // 1. profiles.name 2. Supabaseユーザーのメールアドレス 3. 'ユーザー'
     const displayName = userProfile?.name || session.user.email || 'ユーザー';
     
     return (
@@ -190,17 +216,17 @@ const AuthPage: React.FC = () => {
             onToggleForm={(displayName, birthdayValue) => {
               setIsSignIn(true);
 
-              // 💥 修正: セッションを再取得し、取得できたら公開された handleAuthSuccess を呼び出す
+              // セッションを再取得し、取得できたら公開された handleAuthSuccess を呼び出す
               supabase.auth.getSession().then(({ data: { session: newSession } }) => {
                 if (newSession) {
-                  // ここで AuthPage のスコープにある handleAuthSuccess を使う
+                  // AuthPage のスコープにある handleAuthSuccess を使う
                   handleAuthSuccess(newSession.access_token, displayName, birthdayValue);
                 }
               });
             }}
           />
         )}
-      {/* フォーム切り替えボタンを外部に出し、SignInForm/SignUpFormから削除 */}
+
       <div className="mt-4 text-center">
         <button
           onClick={() => setIsSignIn(!isSignIn)}
