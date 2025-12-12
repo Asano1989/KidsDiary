@@ -8,7 +8,6 @@ interface UserProfile {
   supabaseUid: string;
 }
 
-// AuthSuccessParams の定義は問題ありません
 type AuthSuccessParams = {
     session: Session;
     displayName?: string;
@@ -31,10 +30,10 @@ const useAuthLogic = () => {
       return;
     }
 
-    // 💡 修正 1: session.access_token を変数として定義
+    //  session.access_token を変数として定義
     const jwtToken = session.access_token;
     
-    // JWTが存在しない場合は処理を中断 (念のため)
+    // JWTが存在しない場合は処理を中断
     if (!jwtToken) {
         console.error("JWT Token is missing in session.");
         return;
@@ -44,7 +43,7 @@ const useAuthLogic = () => {
     const expires = new Date();
     expires.setDate(expires.getDate() + 7); // 有効期限: 7日間
 
-    // 💡 修正 2: jwtToken を使用 (ReferenceError解消)
+    // jwtToken を使用 (ReferenceError解消)
     document.cookie = `${RAIL_COOKIE_KEY}=${jwtToken}; path=/; expires=${expires.toUTCString()}; secure=${window.location.protocol === 'https:'}; samesite=Lax`;
 
     // 1. Rails連携（/api/v1/users/register_on_rails へPOST）
@@ -68,7 +67,7 @@ const useAuthLogic = () => {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${jwtToken}`, // 💡 jwtToken を使用
+            'Authorization': `Bearer ${jwtToken}`,
         },
         body: JSON.stringify(body),
       });
@@ -135,10 +134,8 @@ const useAuthLogic = () => {
 
           if (session) {
             if (event === 'SIGNED_IN' || event === 'SIGNED_UP') {
-              // session のみを渡す (displayName/birthdayValueは空)
-              handleAuthSuccess({ session });
             }
-             // 💡 修正 3: リロードなど、セッション復元時にも handleAuthSuccess を呼び出す
+
             if (event === 'INITIAL_SESSION' && !railsSynced) {
               handleAuthSuccess({ session });
             }

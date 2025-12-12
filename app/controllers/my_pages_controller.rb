@@ -29,5 +29,4 @@ class MyPagesController < ApplicationController
     # return {}
   end
 
-  
 end
