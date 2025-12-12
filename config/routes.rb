@@ -2,6 +2,7 @@ Rails.application.routes.draw do
   root 'top#index'
 
   get 'auth', to: 'auth#index'
+  get 'mypage', to: 'my_pages#show'
     
   # APIエンドポイントの定義
   namespace :api do
