@@ -2,21 +2,21 @@ import React, { useState } from 'react';
 import { supabase } from '../supabaseClient';
 
 interface SignUpFormProps {
-  onToggleForm: () => void; // ログイン/登録切り替え用
+  onToggleForm: (displayName?: string, birthday?: string) => void;
 }
 
 const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleForm }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState(''); // パスワード確認
-  const [displayName, setDisplayName] = useState(''); // 表示名 (変更)
+  const [displayName, setDisplayName] = useState(''); // 表示名
   const [birthday, setBirthday] = useState(''); // 誕生日（任意）
   
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
-  // パスワード確認用ヘルパー関数 (既存ロジックから簡略化)
+  // パスワード確認用ヘルパー関数
   const waitForSession = async (maxAttempts = 5, delay = 1000) => {
     for (let i = 0; i < maxAttempts; i++) {
       const { data: { session } } = await supabase.auth.getSession();
@@ -31,6 +31,9 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleForm }) => {
     setLoading(true);
     setMessage('');
     setError('');
+
+    const nameValue = displayName;
+    const birthdayValue = birthday;
 
     if (password !== passwordConfirm) {
       setError('パスワードが一致しません。');
@@ -65,7 +68,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleForm }) => {
 
         // 3. 全ての処理が成功
         setMessage('登録に成功しました。ログイン画面へ移動します。');
-        onToggleForm(); // ログイン画面へ遷移
+        onToggleForm(displayName, birthday); // ログイン画面へ遷移
         
       } else {
         // メール検証が必要でセッションが確立されていない場合
@@ -134,7 +137,6 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleForm }) => {
           type="text"
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
-          required
           className="w-full p-2 border border-gray-400 rounded-lg focus:ring-gray-600 focus:border-gray-600"
         />
       </div>
