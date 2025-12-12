@@ -12,7 +12,7 @@
         <p>
           <span class="font-medium text-gray-600">表示名:</span>
           <span class="text-gray-900 font-bold ml-2">
-            <%= @profile_data[:name].presence || @user.email.split('@').first %>
+            <%= @user.name %>
           </span>
         </p>
         
@@ -37,16 +37,11 @@
     <%# 2. ログアウトボタン（Reactコンポーネントを埋め込む） %>
     <%# ---------------------------------------------------- %>
     <div class="mt-8">
-      <h2 class="text-xl font-semibold text-gray-700 mb-4 border-t pt-4">アクション</h2>
-      <%# Reactで作成したログアウト処理を呼び出すためのコンポーネントを埋め込む %>
-      <%# 今回はAuthPage.tsxにログアウト機能があるので、それを再利用するか、 %>
-      <%# 独立したログアウト処理をサーバーサイドまたはクライアントサイドで実装する必要があります。 %>
-      
-      <%# ログアウト処理がReact側にある場合、ここに小さなReactコンポーネントをマウント %>
       <div id="react-logout-root">
-        <button class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 rounded-lg transition duration-200">
-          ログアウト
-        </button>
+        <%= button_to "ログアウト", logout_path,
+              method: :delete,
+              data: { confirm: "本当にログアウトしますか？" },
+              class: "w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 rounded-lg transition duration-200" %>
       </div>
     </div>
   </div>
