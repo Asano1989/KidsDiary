@@ -8,6 +8,7 @@ interface UserProfile {
   supabaseUid: string;
 }
 
+// AuthSuccessParams の定義は問題ありません
 type AuthSuccessParams = {
     session: Session;
     displayName?: string;
@@ -24,15 +25,29 @@ const useAuthLogic = () => {
   // ログイン成功時にRails DBとの連携とユーザープロファイルの取得を実行
   const handleAuthSuccess = useCallback(async ({ session, displayName, birthdayValue }: AuthSuccessParams) => {
     if (railsSynced) return;
-    
+  
     if (!session || !session.user) {
-      // セッションまたはユーザー情報がない場合は処理を中断
       console.error("Supabase Session or User is missing (in handleAuthSuccess).");
       return;
     }
 
+    // 💡 修正 1: session.access_token を変数として定義
+    const jwtToken = session.access_token;
+    
+    // JWTが存在しない場合は処理を中断 (念のため)
+    if (!jwtToken) {
+        console.error("JWT Token is missing in session.");
+        return;
+    }
+    
+    const RAIL_COOKIE_KEY = 'rails_access_token';
+    const expires = new Date();
+    expires.setDate(expires.getDate() + 7); // 有効期限: 7日間
+
+    // 💡 修正 2: jwtToken を使用 (ReferenceError解消)
+    document.cookie = `${RAIL_COOKIE_KEY}=${jwtToken}; path=/; expires=${expires.toUTCString()}; secure=${window.location.protocol === 'https:'}; samesite=Lax`;
+
     // 1. Rails連携（/api/v1/users/register_on_rails へPOST）
-    // リクエストボディにsupabase_uidとemailを常に含め、displayName/birthdayValueは存在する場合のみ含める
     const body: { user: { supabase_uid: string, email: string | undefined, name?: string, birthday?: string } } = {
         user: {
             supabase_uid: session.user.id,
@@ -43,16 +58,18 @@ const useAuthLogic = () => {
     if (displayName) body.user.name = displayName;
     if (birthdayValue) body.user.birthday = birthdayValue;
 
-    const RAIL_API_BASE = process.env.REACT_APP_RAILS_API_BASE_URL;
+    const RAIL_API_BASE = process.env.REACT_APP_RAILS_API_BASE_URL || ''; // デフォルト値を追加
+    // RAIL_API_BASE が undefined の場合に備えてチェック
+    const apiUrl = RAIL_API_BASE ? `${RAIL_API_BASE}/api/v1/users/register_on_rails` : '/api/v1/users/register_on_rails';
+
 
     try {
-      const response = await fetch(`${RAIL_API_BASE}/api/v1/users/register_on_rails`, {
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session.access_token}`,
+            'Authorization': `Bearer ${jwtToken}`, // 💡 jwtToken を使用
         },
-        // body オブジェクト全体を渡す
         body: JSON.stringify(body),
       });
 
@@ -65,7 +82,6 @@ const useAuthLogic = () => {
       setRailsSynced(true);
 
       // 2. Supabaseからprofilesテーブルの表示名を取得
-      // handleAuthSuccess の外で最新のセッションを取得する必要はない
       const user = session.user; // 引数の session を使用
 
       // 3. Profiles取得
@@ -88,7 +104,6 @@ const useAuthLogic = () => {
             break;
         }
 
-        // 406 (0 rows) の場合のみ再試行
         if (profileError && profileError.code === 'PGRST116' && i < MAX_ATTEMPTS - 1) {
           await new Promise(resolve => setTimeout(resolve, DELAY_MS));
         } else {
@@ -116,37 +131,25 @@ const useAuthLogic = () => {
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (event: AuthChangeEvent, session: Session | null) => {
         setSession(session);
-        // ロード処理を分離
         setLoading(false);
-          
+
           if (session) {
             if (event === 'SIGNED_IN' || event === 'SIGNED_UP') {
               // session のみを渡す (displayName/birthdayValueは空)
+              handleAuthSuccess({ session });
+            }
+             // 💡 修正 3: リロードなど、セッション復元時にも handleAuthSuccess を呼び出す
+            if (event === 'INITIAL_SESSION' && !railsSynced) {
               handleAuthSuccess({ session });
             }
           }
         }
       );
 
-    // 2. 初期セッションの確認（ページロード時）
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        // セッションが存在する場合のみ呼び出す
-        handleAuthSuccess({ session });
-      }
-      // ロード完了
-      setLoading(false);
-      
-      return () => {
-        authListener.subscription.unsubscribe();
-      };
-    });
-
     return () => {
       authListener.subscription.unsubscribe();
     };
-     // 依存配列に handleAuthSuccess は必須
-  }, [handleAuthSuccess]);
+  }, [handleAuthSuccess, railsSynced]);
 
   // ログアウト処理
   const handleSignOut = async () => {
@@ -155,6 +158,10 @@ const useAuthLogic = () => {
     if (error) {
       console.error('ログアウト失敗:', error);
       alert('ログアウト中にエラーが発生しました。');
+    } else {
+        // ログアウト成功時、Rails用のCookieを削除
+        document.cookie = 'rails_access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        setRailsSynced(false);
     }
     setLoading(false);
   };
@@ -170,7 +177,7 @@ const useAuthLogic = () => {
 
 const AuthPage: React.FC = () => {
   const { session, userProfile, loading, handleSignOut, handleAuthSuccess } = useAuthLogic();
-  
+
   // true: サインインフォームを表示, false: サインアップフォームを表示
   const [isSignIn, setIsSignIn] = useState<boolean>(true);
 
@@ -186,7 +193,7 @@ const AuthPage: React.FC = () => {
   if (session) {
     // 1. profiles.name 2. Supabaseユーザーのメールアドレス 3. 'ユーザー'
     const displayName = userProfile?.name || session.user.email || 'ユーザー';
-    
+    
     return (
       <div className="w-full max-w-md mx-auto">
         <div className="bg-white p-6 shadow-md rounded-lg text-center space-y-6">
@@ -199,6 +206,12 @@ const AuthPage: React.FC = () => {
           >
             ログアウト
           </button>
+        </div>
+        {/* Myページへのリンクを追加 */}
+        <div className="mt-4 text-center">
+            <a href="/mypage" className="text-sm text-blue-600 hover:text-blue-800">
+                → マイページへ移動
+            </a>
         </div>
       </div>
     );
@@ -220,7 +233,12 @@ const AuthPage: React.FC = () => {
               supabase.auth.getSession().then(({ data: { session: newSession } }) => {
                 if (newSession) {
                   // AuthPage のスコープにある handleAuthSuccess を使う
-                  handleAuthSuccess(newSession.access_token, displayName, birthdayValue);
+                  // handleAuthSuccess は { session, displayName, birthdayValue } を引数として取るように定義を変更
+                  handleAuthSuccess({ 
+                        session: newSession, 
+                        displayName: displayName, 
+                        birthdayValue: birthdayValue 
+                    });
                 }
               });
             }}
