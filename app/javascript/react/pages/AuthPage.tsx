@@ -159,8 +159,13 @@ const useAuthLogic = () => {
       console.error('ログアウト失敗:', error);
       alert('ログアウト中にエラーが発生しました。');
     } else {
-        // ログアウト成功時、Rails用のCookieを削除
-        document.cookie = 'rails_access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        // ログアウト成功時
+        const RAIL_COOKIE_KEY = 'rails_access_token';
+        
+        // 1. Rails用のCookieを削除 (有効期限を過去にする)
+        document.cookie = `${RAIL_COOKIE_KEY}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; secure=${window.location.protocol === 'https:'}; samesite=Lax`;
+        
+        // 2. ローカルの状態をリセット
         setRailsSynced(false);
     }
     setLoading(false);
@@ -193,7 +198,7 @@ const AuthPage: React.FC = () => {
   if (session) {
     // 1. profiles.name 2. Supabaseユーザーのメールアドレス 3. 'ユーザー'
     const displayName = userProfile?.name || session.user.email || 'ユーザー';
-    
+
     return (
       <div className="w-full max-w-md mx-auto">
         <div className="bg-white p-6 shadow-md rounded-lg text-center space-y-6">
