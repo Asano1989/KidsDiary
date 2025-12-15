@@ -12,12 +12,15 @@
     <%= javascript_include_tag "application", "data-turbo-track": "reload", type: "module" %>
   </head>
 
-  <body>
+  <body class="flex flex-col min-h-screen">
     <div id="header">
       <%= render 'layouts/header' %>
     </div>
-    <div id="main">
+    <div id="main" class="flex-grow flex flex-col">
       <%= yield %>
+    </div>
+    <div id="menu">
+      <%= render 'layouts/menu' %>
     </div>
   </body>
 </html>
