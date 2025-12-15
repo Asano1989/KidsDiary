@@ -165,7 +165,7 @@ const useAuthLogic = () => {
 
     // 1. Supabaseのイベントリスナー
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (event: AuthChangeEvent, session: Session | null) => { // 💡 async に変更
+      async (event: AuthChangeEvent, session: Session | null) => {
         setSession(session);
         setLoading(false);
 
@@ -201,6 +201,11 @@ const useAuthLogic = () => {
         }
       }
     );
+
+    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
+      setSession(initialSession);
+      setLoading(false);
+    });
 
     return () => {
       authListener.subscription.unsubscribe();
