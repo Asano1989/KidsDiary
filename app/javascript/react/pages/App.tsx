@@ -3,8 +3,8 @@ import AuthPage from './AuthPage';
 
 const App: React.FC = () => {
   return (
-    <div className="min-h-screen bg-gray-100 p-4 md:p-8">
-      <div className="flex items-start justify-center">
+    <div className="flex-grow w-full flex bg-gray-100 p-6">
+      <div className="w-full flexitems-start justify-center">
         <AuthPage />
       </div>
     </div>

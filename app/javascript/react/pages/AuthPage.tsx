@@ -165,7 +165,7 @@ const useAuthLogic = () => {
 
     // 1. Supabaseのイベントリスナー
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (event: AuthChangeEvent, session: Session | null) => { // 💡 async に変更
+      async (event: AuthChangeEvent, session: Session | null) => {
         setSession(session);
         setLoading(false);
 
@@ -183,12 +183,12 @@ const useAuthLogic = () => {
             if (railsSynced) return;
 
             // 💡 まずフラグを立てて、重複イベントからの呼び出しをブロック
-            setRailsSynced(true); 
+            setRailsSynced(true);
 
-            const success = await handleAuthSuccess({ session }); 
+            const success = await handleAuthSuccess({ session });
 
             // handleAuthSuccessが失敗した場合のみ、フラグをリセットしてリトライを可能にする
-            if (!success) {   
+            if (!success) {
               console.error('handleAuthSuccess 失敗。Rails同期フラグをリセット。');
               setRailsSynced(false);
             }
@@ -201,6 +201,11 @@ const useAuthLogic = () => {
         }
       }
     );
+
+    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
+      setSession(initialSession);
+      setLoading(false);
+    });
 
     return () => {
       authListener.subscription.unsubscribe();
@@ -251,7 +256,7 @@ const AuthPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-gray-700">
+      <div className="h-full flex items-center justify-center text-gray-700">
         ロード中...
       </div>
     );
@@ -263,7 +268,7 @@ const AuthPage: React.FC = () => {
     const displayName = userProfile?.name || session.user.email || 'ユーザー';
 
     return (
-      <div className="w-full max-w-md mx-auto">
+      <div className="h-full w-full max-w-md mx-auto">
         <div className="bg-white p-6 shadow-md rounded-lg text-center space-y-6">
           <h2 className="text-xl font-bold text-gray-800">
             **{displayName}**さんはログインしています
@@ -274,12 +279,6 @@ const AuthPage: React.FC = () => {
           >
             ログアウト
           </button>
-        </div>
-
-        <div className="mt-4 text-center">
-            <a href="/mypage" className="text-sm text-blue-600 hover:text-blue-800">
-                → マイページへ移動
-            </a>
         </div>
       </div>
     );
@@ -309,7 +308,7 @@ const AuthPage: React.FC = () => {
           />
         )}
 
-      <div className="mt-4 text-center">
+      <div className="h-full w-full mt-4 text-center">
         <button
           onClick={() => setIsSignIn(!isSignIn)}
           className="text-sm text-gray-600 hover:text-gray-800"
