@@ -3,6 +3,8 @@ Rails.application.routes.draw do
 
   get 'auth', to: 'auth#index'
   delete 'logout', to: 'auth#destroy', as: :logout
+  post 'auth/set_cookie', to: 'auth#set_cookie'
+  get 'auth/current_header', to: 'auth#current_header'
   
   get 'mypage', to: 'my_pages#show'
     
