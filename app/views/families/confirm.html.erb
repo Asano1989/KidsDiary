@@ -1,0 +1,20 @@
+<div id="show_family" class="text-center">
+  <h1 class="text-3xl font-bold m-6">家族（グループ）参加確認</h1>
+
+  <div class="w-full">
+    <div>
+      家族（グループ）名
+    </div>
+    <div>
+      に参加しますか？
+    </div>
+    <div class="flex justify-center w-full">
+      <div>
+        <%= button_to 'はい', root_path, method: :get, class: "box-border border border-default m-2 pl-2 pr-2" %>
+      </div>
+      <div>
+        <%= button_to 'いいえ', root_path, method: :get, class: "box-border border border-default m-2 pl-2 pr-2" %>
+      </div>
+    </div>
+  </div>
+</div>

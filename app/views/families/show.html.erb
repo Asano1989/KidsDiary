@@ -1,0 +1,34 @@
+<div id="show_family" class="text-center">
+  <h1 class="text-3xl font-bold m-6">家族（グループ）の情報</h1>
+
+  <% if @family.nil? %>
+    <div id="not_belongs_family">
+      <div class="mt-6 m-2">
+        <%= button_to "家族（グループ）を作成", new_family_path, method: :get, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2 m-2" %>
+      </div>
+
+      <div>
+        <form action="#" method="post">
+          <p>家族コードを入力<br>
+          <input type="text" name="code" class="border border-default-medium rounded-base"></p>
+          <p><input type="submit" value="家族（グループ）メンバーになる" class="box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2 m-2"></p>
+        </form>
+      </div>
+    </div>
+
+  <% else %>
+    <div id="family_info">
+      <div class="mt-6 m-2">
+        家族（グループ）名： <%= @family.name %>
+      </div>
+
+      <div class="mt-6 m-2">
+        家族（グループ）メンバー一覧
+      </div>
+
+      <div class="mt-6 m-2">
+        子ども一覧
+      </div>
+    </div>
+  <% end %>
+</div>

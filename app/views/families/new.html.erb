@@ -1,0 +1,17 @@
+<div id="new_family" class="text-center">
+  <h1 class="text-3xl font-bold m-6">家族（グループ）の作成</h1>
+
+  <div id="create_family_form">
+    <%= form_with url: root_path do |f| %>
+      <div>
+        <%= f.label :name, "家族（グループ）名" %>
+      </div>
+      <div>
+        <%= f.text_field :name, class: "border border-default-medium rounded-base" %>
+      </div>
+      <div>
+        <%= f.submit "家族（グループ）を作成", class: "box-border border border-default-medium shadow-xs font-medium rounded-full text-sm px-4 py-2 m-2" %>
+      </div>
+    <% end %>
+  </div>
+</div>
