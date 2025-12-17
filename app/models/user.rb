@@ -7,6 +7,10 @@ class User < ApplicationRecord
   # 招待時のロジックなどで、既に家族がいる場合はエラーにする
   validate :must_not_belong_to_multiple_families, on: :create_membership
 
+  def can_create_family?
+    family_id.nil? && owned_family.nil?
+  end
+
   private
 
   def must_not_belong_to_multiple_families
