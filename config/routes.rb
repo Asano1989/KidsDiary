@@ -7,6 +7,10 @@ Rails.application.routes.draw do
   get 'auth/current_header', to: 'auth#current_header'
   
   get 'mypage', to: 'my_pages#show'
+
+  resource :family, as: :family do
+    get 'confirm'
+  end
     
   # APIエンドポイントの定義
   namespace :api do
