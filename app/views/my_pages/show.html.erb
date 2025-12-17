@@ -33,7 +33,7 @@
           <span class="font-medium text-gray-600">所属している家族（グループ）:</span>
           <span class="text-gray-800 ml-2 break-all">
             <% if @user.family.present? %>
-              <%= @user.family %>
+              <%= @user.family.name %>
             <% else %>
               所属している家族なし
             <% end %></span>
