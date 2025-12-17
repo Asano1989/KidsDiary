@@ -3,7 +3,10 @@
 
   <% if @family.nil? %>
     <div id="not_belongs_family">
-      <div class="mt-6 m-2">
+      <div>
+        あなたは家族（グループ）に所属していません
+      </div>
+      <div class="my-6 mx-2">
         <%= button_to "家族（グループ）を作成", new_family_path, method: :get, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2 m-2" %>
       </div>
 
@@ -25,15 +28,25 @@
   <% else %>
     <div id="family_info">
       <div class="mt-6 m-2">
-        家族（グループ）名： <%= @family.name %>
+        <span class="font-bold">家族（グループ）名：</span> <%= @family.name %>
       </div>
 
       <div class="mt-6 m-2">
-        家族（グループ）メンバー一覧
+        <span class="font-bold">家族（グループ）メンバー一覧</span>
+      </div>
+      <div>
+        <ul class="list-disc list-inside">
+          <% @members.each do |member| %>
+            <li>
+              <%= member.name %>
+              <% if member.id == @family.owner_id %>（管理者）<% end %>
+            </li>
+          <% end %>
+        </ul>
       </div>
 
       <div class="mt-6 m-2">
-        子ども一覧
+        <span class="font-bold">子ども一覧</span>
       </div>
     </div>
   <% end %>
