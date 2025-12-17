@@ -27,8 +27,10 @@ class FamiliesController < ApplicationController
   end
 
   def show
-    @family = current_user.family
-    @members = @family.users
+    if current_user.family.present?
+      @family = current_user.family
+      @members = @family.users
+    end
   end
 
   def edit
