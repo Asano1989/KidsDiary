@@ -27,8 +27,8 @@ class FamiliesController < ApplicationController
   end
 
   def show
-    @user = current_user
-    @family = Family.find_by(owner_id: @user.id)
+    @family = current_user.family
+    @members = @family.users
   end
 
   def edit
