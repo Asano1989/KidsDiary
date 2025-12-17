@@ -31,7 +31,12 @@
 
         <p>
           <span class="font-medium text-gray-600">所属している家族（グループ）:</span>
-          <span class="text-gray-800 ml-2 break-all">＜％＝ @user.family.name ％＞</span>
+          <span class="text-gray-800 ml-2 break-all">
+            <% if @user.family.present? %>
+              <%= @user.family %>
+            <% else %>
+              所属している家族なし
+            <% end %></span>
         </p>
       </div>
     </section>
@@ -41,8 +46,11 @@
         <%= button_to "ユーザー情報を確認", root_path, method: :get, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2.5" %>
       </div>
       <div id="group_button">
-        <%= button_to "家族（グループ）に入る・確認", root_path, method: :get, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2.5" %><br />
-        <%= button_to "家族（グループ）を確認", root_path, method: :get, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2.5" %>
+        <% if current_user.family.present? %>
+          <%= button_to "家族（グループ）を確認", family_path, method: :get, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2.5" %>
+        <% else %>
+          <%= button_to "家族（グループ）に入る・確認", family_path, method: :get, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2.5" %>
+        <% end %>
       </div>
     </div>
   </div>
