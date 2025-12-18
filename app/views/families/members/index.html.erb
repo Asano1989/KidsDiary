@@ -11,7 +11,7 @@
         </td>
         <td>
           <% if @family.owner_id == current_user.id || member.id == current_user.id %>
-            <%= button_to "削除する",
+            <%= button_to delete_or_optout(current_user, @family),
                   family_member_path(@family, member),
                   method: :delete,
                   data: { turbo_confirm: "本当にこのメンバーを家族から削除しますか？" },
