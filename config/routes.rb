@@ -8,8 +8,10 @@ Rails.application.routes.draw do
   
   get 'mypage', to: 'my_pages#show'
 
-  resource :family, as: :family do
-    get 'confirm'
+  scope module: :families do
+    resources :families do
+      resources :members, only: [:index, :new, :create, :destroy]
+    end
   end
     
   # APIエンドポイントの定義
