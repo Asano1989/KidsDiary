@@ -22,14 +22,18 @@
         <% end %>
       </ul>
     </div>
-    <% if @members.count > 1 %>
+    <% if @members.count > 1 && current_user.family.id == @family.owner_id %>
       <div>
         <%= button_to "メンバーを削除", family_members_path(family_id: @family.id), method: :get, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2 m-2" %>
         <%= button_to "メンバーを追加", new_family_member_path(family_id: @family.id), method: :get, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2 m-2" %>
       </div>
-    <% else %>
+    <% elsif @members.count <= 1 && current_user.family.id == @family.owner_id %>
       <div>
         <%= button_to "メンバーを追加", new_family_member_path(family_id: @family.id), method: :get, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2 m-2" %>
+      </div>
+    <% else %>
+      <div>
+        <%= button_to "家族から脱退", family_members_path(family_id: @family.id), method: :get, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2 m-2" %>
       </div>
     <% end %>
 
