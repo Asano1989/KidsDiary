@@ -1,0 +1,37 @@
+<div id="new_family" class="text-center">
+  <h1 class="text-3xl font-bold m-6">家族（グループ）の作成</h1>
+
+  <div id="not_belongs_family" class="my-8">
+    <div>
+      あなたは家族（グループ）に所属していません
+    </div>
+  </div>
+
+  <div id="family_code_form" class="my-10">
+    <%= form_with url: root_path, local: true do |f| %>
+      <div>
+        <%= f.label :code, '家族コードを入力' %>
+      </div>
+      <div>
+        <%= f.text_field :code, class: "border border-default-medium rounded-base" %>
+      </div>
+      <div>
+        <%= f.submit '家族（グループ）メンバーになる', class: "box-border border border-default-medium shadow-xs font-medium rounded-full text-sm px-4 py-2 m-2" %>
+      </div>
+    <% end %>
+  </div>
+
+  <div id="create_family_form" class="my-10">
+    <%= form_with(model: @family, url: family_index_path, local: true) do |f| %>
+      <div>
+        <%= f.label :name, "家族（グループ）名" %>
+      </div>
+      <div>
+        <%= f.text_field :name, class: "border border-default-medium rounded-base" %>
+      </div>
+      <div>
+        <%= f.submit "家族（グループ）を作成", class: "box-border border border-default-medium shadow-xs font-medium rounded-full text-sm px-4 py-2 m-2" %>
+      </div>
+    <% end %>
+  </div>
+</div>
