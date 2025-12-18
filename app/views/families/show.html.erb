@@ -30,6 +30,9 @@
       <div class="mt-6 m-2">
         <span class="font-bold">家族（グループ）名：</span> <%= @family.name %>
       </div>
+      <div>
+        <%= button_to '家族（グループ）名を編集する', edit_family_path, method: :get, class: "box-border border border-default-medium shadow-xs font-medium rounded-full text-sm px-4 py-2 m-2" %>
+      </div>
 
       <div class="mt-6 m-2">
         <span class="font-bold">家族（グループ）メンバー一覧</span>
