@@ -11,7 +11,7 @@ Rails.application.routes.draw do
   scope module: :families do
     resources :families  do
       resources :members, only: [:index, :new, :create, :destroy]
-      resources :children, only: [:new, :create]
+      resources :children, only: [:index, :new, :create, :edit, :update, :destroy]
     end
   end
     
