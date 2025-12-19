@@ -19,4 +19,14 @@ class User < ApplicationRecord
       errors.add(:family, "は既に登録済みです。他の家族に参加することはできません。")
     end
   end
+
+  def avatar_url
+    if avatar.attached?
+      # 外部ストレージのURLを返す
+      Rails.application.routes.url_helpers.url_for(avatar)
+    else
+      # assets内などのデフォルト画像のパスを返す
+      ActionController::Base.helpers.asset_path('default_avatar.png')
+    end
+  end
 end
