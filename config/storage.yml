@@ -6,6 +6,8 @@ cloudflare:
   bucket: <%= ENV['CLOUDFLARE_R2_BUCKET'] %>
   region: auto
   force_path_style: true
+  http_open_timeout: 5
+  http_read_timeout: 5
 
 test:
   service: Disk
