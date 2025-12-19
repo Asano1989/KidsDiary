@@ -75,4 +75,6 @@ Rails.application.configure do
   config.action_controller.raise_on_missing_callback_actions = true
 
   config.middleware.insert_after ActionDispatch::Static, Rack::LiveReload
+
+  config.active_storage.service = :cloudflare
 end

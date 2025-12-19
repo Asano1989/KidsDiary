@@ -96,4 +96,6 @@ Rails.application.configure do
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
 
   config.hosts << "tsumugi.h73a.com"
+
+  config.active_storage.service = :cloudflare
 end
