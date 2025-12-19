@@ -10,9 +10,18 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_12_17_112421) do
+ActiveRecord::Schema[7.1].define(version: 2025_12_19_004647) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "children", force: :cascade do |t|
+    t.string "name", null: false
+    t.date "birthday"
+    t.bigint "family_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["family_id"], name: "index_children_on_family_id"
+  end
 
   create_table "families", force: :cascade do |t|
     t.string "name", null: false
@@ -34,6 +43,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_12_17_112421) do
     t.index ["supabase_uid"], name: "index_users_on_supabase_uid", unique: true
   end
 
+  add_foreign_key "children", "families"
   add_foreign_key "families", "users", column: "owner_id"
   add_foreign_key "users", "families"
 end
