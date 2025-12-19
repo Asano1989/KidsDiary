@@ -52,6 +52,7 @@ gem 'jwt', "~> 3.1.2"
 gem 'supabase'
 
 gem 'mini_magick', '~> 5.3.1'
+gem "aws-sdk-s3", require: false
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
