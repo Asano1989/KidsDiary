@@ -1,0 +1,32 @@
+<div id="index_children" class="text-center">
+  <h1 class="text-3xl font-bold m-6">子どもの情報一覧</h1>
+
+  <div class="flex justify-center my-10">
+    <table>
+    <% @children.each do |child| %>
+      <tr>
+        <td>
+          <%= child.name %>：
+          <%= child.birthday %>
+        </td>
+        <td>
+          <% if @family.owner_id == current_user.id %>
+            <%= button_to "編集", edit_family_child_path(@family, child), method: :get, class: "box-border border border-default-medium shadow-xs font-medium rounded-full text-sm px-4 py-2 m-2" %>
+        </td>
+        <td>
+            <%= button_to "削除",
+                  family_child_path(@family, child),
+                  method: :delete,
+                  data: { turbo_confirm: "本当にこの子どもの情報を家族から削除しますか？" },
+                  class: "box-border border border-default-medium shadow-xs font-medium rounded-full text-sm px-4 py-2 m-2" %>
+          <% end %>
+        </td>
+      </tr>
+    <% end %>
+    </table>
+  </div>
+
+  <div>
+    <%= link_to "戻る", family_path(@family) %>
+  </div>
+</div>
