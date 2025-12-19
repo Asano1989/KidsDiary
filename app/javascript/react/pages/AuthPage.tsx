@@ -39,10 +39,6 @@ const useAuthLogic = () => {
     birthday?: string,
     avatarFile?: File | null
   }) => {
-    console.log("--- Syncing with Rails ---");
-    console.log("Name:", displayName);
-    console.log("Has Avatar:", !!avatarFile);
-
     // 1. ブロック判定: 名前や画像がある場合は、フラグを無視して実行（新規登録時用）
     const isExplicitUpdate = !!(displayName || avatarFile);
     if (railsSyncedRef.current && !isExplicitUpdate) return true;
@@ -55,11 +51,6 @@ const useAuthLogic = () => {
       if (displayName) formData.append('user[name]', displayName);
       if (birthday) formData.append('user[birthday]', birthday);
       if (avatarFile) formData.append('user[avatar]', avatarFile);
-
-      // 💡 デバッグログを追加：送信直前の FormData の中身を表示
-      for (let [key, value] of formData.entries()) {
-        console.log(`FormData Check: ${key} =`, value);
-      }
 
       // 3. Railsへの同期 (register_on_rails)
       const response = await fetch('/api/v1/users/register_on_rails', {
