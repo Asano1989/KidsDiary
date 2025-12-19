@@ -50,6 +50,7 @@ gem 'cssbundling-rails', "~> 1.4.3"
 gem 'jwt', "~> 3.1.2"
 
 gem 'supabase', '~> 0.1.0'
+gem 'faraday', '~> 2.14.0'
 
 gem 'mini_magick', '~> 5.3.1'
 gem "aws-sdk-s3", require: false
