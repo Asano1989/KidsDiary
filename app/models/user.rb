@@ -12,12 +12,8 @@ class User < ApplicationRecord
     family_id.nil? && owned_family.nil?
   end
 
-  private
-
-  def must_not_belong_to_multiple_families
-    if family_id.present?
-      errors.add(:family, "は既に登録済みです。他の家族に参加することはできません。")
-    end
+  def display_avatar
+    avatar.attached? ? avatar : "default-avatar.png"
   end
 
   def avatar_url
@@ -26,7 +22,15 @@ class User < ApplicationRecord
       Rails.application.routes.url_helpers.url_for(avatar)
     else
       # assets内などのデフォルト画像のパスを返す
-      ActionController::Base.helpers.asset_path('default_avatar.png')
+      ActionController::Base.helpers.asset_path('default-avatar.png')
+    end
+  end
+
+  private
+
+  def must_not_belong_to_multiple_families
+    if family_id.present?
+      errors.add(:family, "は既に登録済みです。他の家族に参加することはできません。")
     end
   end
 end
