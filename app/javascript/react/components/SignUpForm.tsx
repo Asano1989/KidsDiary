@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { supabase } from '../supabaseClient';
 
 interface SignUpFormProps {
-  onToggleForm: (displayName?: string, birthday?: string) => void;
+  onToggleForm: (displayName?: string, birthday?: string, avatar?: File) => void;
 }
 
 const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleForm }) => {
@@ -11,6 +11,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleForm }) => {
   const [passwordConfirm, setPasswordConfirm] = useState(''); // パスワード確認
   const [displayName, setDisplayName] = useState(''); // 表示名
   const [birthday, setBirthday] = useState(''); // 誕生日（任意）
+  const [avatar, setAvatar] = useState<File | null>(null); // プロフィール画像（任意）
   
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -32,9 +33,6 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleForm }) => {
     setMessage('');
     setError('');
 
-    const nameValue = displayName;
-    const birthdayValue = birthday;
-
     if (password !== passwordConfirm) {
       setError('パスワードが一致しません。');
       setLoading(false);
@@ -43,14 +41,22 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleForm }) => {
 
     try {
       // 1. Supabaseでユーザー登録を実行
-      const { error: signUpError } = await supabase.auth.signUp({ email, password });
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ 
+        email,
+        password
+      });
 
       if (signUpError) throw signUpError;
       
+      // signUpData からセッションを確認
+      const session = signUpData.session;
+      
       // 2. プロファイルデータ（表示名、誕生日）をProfilesテーブルに登録
-      const user = await waitForSession();
+      // セッションが即時取得できない場合を考慮して user を取得
+      const user = session?.user || await waitForSession();
       
       if (user) {
+        // Supabaseのprofilesテーブルへの保存（既存通り）
         const { error: profileError } = await supabase
           .from('profiles')
           .insert([
@@ -63,21 +69,23 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleForm }) => {
         
         if (profileError) {
           console.error("Profile creation failed:", profileError);
-          throw new Error('ユーザー認証は完了しましたが、プロファイル作成に失敗しました。');
+          throw new Error('プロファイル作成に失敗しました。');
         }
 
-        // 3. 全ての処理が成功
-        setMessage('登録に成功しました。ログイン画面へ移動します。');
-        onToggleForm(displayName, birthday); // ログイン画面へ遷移
+        // 3. 重要：Rails側への同期処理を呼び出す
+        // onToggleForm に必要な情報をすべて渡します
+        setMessage('登録に成功しました。');
+        
+        // ここで avatar を渡す
+        onToggleForm(displayName.trim(), birthday, avatar || undefined);
         
       } else {
-        // メール検証が必要でセッションが確立されていない場合
-        setMessage('確認メールを送信しました。メール内のリンクをクリックして登録を完了してください。');
+        setMessage('確認メールを送信しました。メール内のリンクをクリックして完了してください。');
       }
 
-    } catch (err) {
+    } catch (err: any) {
       console.error('Sign Up Error:', err);
-      setError('登録中にエラーが発生しました。');
+      setError(err.message || '登録中にエラーが発生しました。');
     } finally {
       setLoading(false);
     }
@@ -150,6 +158,24 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleForm }) => {
           value={birthday}
           onChange={(e) => setBirthday(e.target.value)}
           className="w-full p-2 border border-gray-400 rounded-lg focus:ring-gray-600 focus:border-gray-600"
+        />
+      </div>
+
+      {/* プロフィール画像（任意） */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="avatar">
+          プロフィール画像
+        </label>
+        <input
+          id="avatar"
+          type="file"
+          accept="image/*"
+          onChange={(e) => {
+            if (e.target.files && e.target.files[0]) {
+              setAvatar(e.target.files[0]);
+            }
+          }}
+          className="w-full p-2 border border-gray-400 rounded-lg"
         />
       </div>
 

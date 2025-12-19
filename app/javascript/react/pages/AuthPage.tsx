@@ -12,6 +12,7 @@ type AuthSuccessParams = {
     session: Session;
     displayName?: string;
     birthdayValue?: string;
+    avatarFile?: File;
 }
 
 const useAuthLogic = () => {
@@ -27,127 +28,88 @@ const useAuthLogic = () => {
   }, [railsSynced]);
 
   // ログイン成功時にRails DBとの連携とユーザープロファイルの取得を実行
-  const handleAuthSuccess = useCallback(async ({ session, displayName, birthdayValue }: AuthSuccessParams) => {
-    if (railsSyncedRef.current) return;
-  
-    if (!session || !session.user) {
-      console.error("Supabase Session or User is missing (in handleAuthSuccess).");
-      return false;
-    }
-
-    // 暫定的なプロファイル設定
-    setUserProfile({
-      name: displayName || session.user.email || 'ユーザー',
-      supabaseUid: session.user.id
-    });
-
-    //  session.access_token を変数として定義
-    const jwtToken = session.access_token;
-    
-    // JWTが存在しない場合は処理を中断
-    if (!jwtToken) {
-        console.error("JWT Token is missing in session.");
-        return;
-    }
-    
-    const RAIL_COOKIE_KEY = 'rails_access_token';
-    const expires = new Date();
-    expires.setDate(expires.getDate() + 7); // 有効期限: 7日間
-
-    // jwtToken を使用 (ReferenceError解消)
-    // document.cookie = `${RAIL_COOKIE_KEY}=${jwtToken}; path=/; expires=${expires.toUTCString()}; secure=${window.location.protocol === 'https:'}; samesite=Lax`;
-
-    // 1. Rails連携（/api/v1/users/register_on_rails へPOST）
-    const body: { user: { supabase_uid: string, email: string | undefined, name?: string, birthday?: string } } = {
-        user: {
-            supabase_uid: session.user.id,
-            email: session.user.email,
-        }
-    };
-
-    if (displayName) body.user.name = displayName;
-    if (birthdayValue) body.user.birthday = birthdayValue;
-
-    const RAIL_API_BASE = process.env.REACT_APP_RAILS_API_BASE_URL || ''; // デフォルト値を追加
-    // RAIL_API_BASE が undefined の場合に備えてチェック
-    const apiUrl = RAIL_API_BASE ? `${RAIL_API_BASE}/api/v1/users/register_on_rails` : '/api/v1/users/register_on_rails';
+  const handleAuthSuccess = useCallback(async ({
+    session,
+    displayName,
+    birthday,
+    avatarFile
+  }: {
+    session: Session,
+    displayName?: string,
+    birthday?: string,
+    avatarFile?: File | null
+  }) => {
+    // 1. ブロック判定: 名前や画像がある場合は、フラグを無視して実行（新規登録時用）
+    const isExplicitUpdate = !!(displayName || avatarFile);
+    if (railsSyncedRef.current && !isExplicitUpdate) return true;
 
     try {
-      const response = await fetch(apiUrl, {
+      // 2. データの準備 (FormData)
+      const formData = new FormData();
+      formData.append('user[supabase_uid]', session.user.id);
+      formData.append('user[email]', session.user.email || '');
+      if (displayName) formData.append('user[name]', displayName);
+      if (birthday) formData.append('user[birthday]', birthday);
+      if (avatarFile) formData.append('user[avatar]', avatarFile);
+
+      // 3. Railsへの同期 (register_on_rails)
+      const response = await fetch('/api/v1/users/register_on_rails', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${jwtToken}`,
+          // 'Content-Type': 'multipart/form-data' は絶対に書かない
+          'Authorization': `Bearer ${session.access_token}`,
+          'Accept': 'application/json',
         },
-        body: JSON.stringify(body),
+        body: formData,
       });
 
       if (!response.ok) {
-        console.error('Rails連携失敗:', await response.json());
-        return;
-      }
-
-      // Rails連携成功時にフラグを立てる
-      // setRailsSynced(true);
-
-      const setCookieApiUrl = `${RAIL_API_BASE ? RAIL_API_BASE : ''}/auth/set_cookie`;
-
-      const cookieResponse = await fetch(setCookieApiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ jwt_token: jwtToken }), // JWTをペイロードとして送信
-      });
-      
-      if (!cookieResponse.ok) {
-          console.error('RailsでのCookie設定に失敗:', await cookieResponse.json());
-          // 処理を継続するか、エラーで中断するかは判断によります
-      }
-
-      // 2. Supabaseからprofilesテーブルの表示名を取得
-      const user = session.user; // 引数の session を使用
-
-      // 3. Profiles取得
-      const MAX_ATTEMPTS = 5;
-      const DELAY_MS = 500;
-      let profile: any = null;
-      let profileError: any = null;
-
-      for (let i = 0; i < MAX_ATTEMPTS; i++) {
-        const result = await supabase
-          .from('profiles')
-          .select('name')
-          .eq('id', user.id)
-          .single();
-
-        profile = result.data;
-        profileError = result.error;
-
-        if (profile) {
-            break;
-        }
-
-        if (profileError && profileError.code === 'PGRST116' && i < MAX_ATTEMPTS - 1) {
-          await new Promise(resolve => setTimeout(resolve, DELAY_MS));
-        } else {
-          break;
-        }
-      }
-
-      if (profile) {
-        setUserProfile({ name: profile.name, supabaseUid: user.id });
-        return true; // 成功
-      } else {
-        console.error('最終的にプロファイル取得失敗:', profileError);
-        setUserProfile({ name: user.email || '名無し', supabaseUid: user.id });
+        console.error("Rails Registration Failed");
         return false;
       }
+
+      // 4. RailsのCookie設定 (set_cookie)
+      const RAIL_API_BASE = process.env.REACT_APP_RAILS_API_BASE_URL || '';
+      const setCookieApiUrl = `${RAIL_API_BASE}/auth/set_cookie`;
+      
+      const cookieResponse = await fetch(setCookieApiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jwt_token: session.access_token }),
+      });
+
+      if (!cookieResponse.ok) {
+        console.error('Rails Cookie error');
+      }
+
+      // 5. 表示用のプロファイル取得 (Supabaseのprofilesテーブルから)
+      const MAX_ATTEMPTS = 5;
+      const DELAY_MS = 500;
+      let profileName = displayName || session.user.email || 'ユーザー';
+
+      for (let i = 0; i < MAX_ATTEMPTS; i++) {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('name')
+          .eq('id', session.user.id)
+          .single();
+
+        if (data?.name) {
+          profileName = data.name;
+          break;
+        }
+        if (i < MAX_ATTEMPTS - 1) await new Promise(res => setTimeout(res, DELAY_MS));
+      }
+
+      // 6. 状態の更新
+      setUserProfile({ name: profileName, supabaseUid: session.user.id });
+      setRailsSynced(true);
+      
+      return true;
     } catch (error) {
-      console.error('Auth Success 処理中に予期せぬエラー:', error);
+      console.error('Auth Success 処理中にエラー:', error);
       return false;
     }
-    return true;
   }, []);
 
 
@@ -159,48 +121,32 @@ const useAuthLogic = () => {
         // Rails側でログアウトされた場合、Supabaseセッションも強制的に破棄
         supabase.auth.signOut();
         
-        // 💡 URLからパラメータを削除して、リロード後に二度実行されるのを防ぐ
+        // URLからパラメータを削除し、リロード後に二度実行されるのを防ぐ
         window.history.replaceState(null, '', window.location.pathname);
     }
 
     // 1. Supabaseのイベントリスナー
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (event: AuthChangeEvent, session: Session | null) => {
-        setSession(session);
-        setLoading(false);
+        async (event: AuthChangeEvent, session: Session | null) => {
+          setSession(session);
+          setLoading(false);
 
-        if (event === 'SIGNED_OUT') {
-          setRailsSynced(false);
-          setUserProfile(null);
-          return;
-        }
-
-        if (session) {
-          // 💡 ログイン/登録時、またはセッション初期化時で、まだRails連携が試行されていなければ実行
-          if ((event === 'SIGNED_IN' || event === 'SIGNED_UP') || (event === 'INITIAL_SESSION' && !railsSynced)) {
-                
-            // 既にRails連携が進行中または成功している場合は中断（最後の防衛線）
-            if (railsSynced) return;
-
-            // 💡 まずフラグを立てて、重複イベントからの呼び出しをブロック
-            setRailsSynced(true);
-
-            const success = await handleAuthSuccess({ session });
-
-            // handleAuthSuccessが失敗した場合のみ、フラグをリセットしてリトライを可能にする
-            if (!success) {
-              console.error('handleAuthSuccess 失敗。Rails同期フラグをリセット。');
-              setRailsSynced(false);
+          if (session) {
+            // SIGNED_UP（新規登録直後）は自動同期を絶対に行わず、SignUpForm 側の処理にすべて任せる
+            if (event === 'SIGNED_UP') {
+              console.log("Blocking automatic sync for SIGNED_UP event");
+              return;
             }
-            
-            // 💡 ログイン/登録完了後、ルートへリダイレクトし、即座に画面を更新
-            if (event === 'SIGNED_IN' || event === 'SIGNED_UP') {
-              window.location.href = '/';
+
+            // 通常のログイン（SIGNED_IN）時のみ、Railsと同期する
+            if (event === 'SIGNED_IN' && !railsSyncedRef.current) {
+              // 既存ユーザーのログイン時は画像などは不要なので空でOK
+              handleAuthSuccess({ session });
+              railsSyncedRef.current = true;
             }
           }
         }
-      }
-    );
+      );
 
     supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
       setSession(initialSession);
@@ -231,7 +177,7 @@ const useAuthLogic = () => {
         // 2. ローカルの状態をリセット
         setRailsSynced(false);
         
-        // 💡 修正点: ログアウト処理完了後、ルートページへ強制リロード
+        // 3. ログアウト処理完了後、ルートページへ強制リロード
         window.location.href = '/';
       }
     } else {
@@ -293,16 +239,18 @@ const AuthPage: React.FC = () => {
           />
         ) : (
           <SignUpForm
-            onToggleForm={async (displayName, birthdayValue) => {
+            onToggleForm={async (name, bday, file) => {
               setIsSignIn(true);
-
-              // セッションを再取得し、取得できたら公開された handleAuthSuccess を呼び出す
               const { data: { session: newSession } } = await supabase.auth.getSession();
               
               if (newSession) {
-                await handleAuthSuccess({ session: newSession, displayName, birthdayValue });
-                // handleAuthSuccess の完了を待たずに、すぐにページを移動したい場合:
-                // window.location.href = '/';
+                console.log("Passing to handleAuthSuccess:", { name, bday, hasFile: !!file });
+                await handleAuthSuccess({
+                  session: newSession,
+                  displayName: name,
+                  birthday: bday,
+                  avatarFile: file
+                });
               }
             }}
           />
