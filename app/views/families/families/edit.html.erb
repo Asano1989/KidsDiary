@@ -4,7 +4,7 @@
     <%= form_with model: @family, url: '/family' do |f| %>
       <div>
         <div>
-          <%= f.label :name, "家族（グループ）名" %>
+          <%= f.label :name, "家族（グループ）名", class: "font-bold" %>
         </div>
         <div>
           <%= f.text_field :name, class: "border border-default-medium rounded-base" %>
@@ -16,7 +16,7 @@
 
   <div id="family_info">
     <div class="mt-6 m-2">
-      家族（グループ）メンバー一覧
+      <span class="font-bold">家族（グループ）メンバー一覧</span>
     </div>
     <div>
       <ul class="list-disc list-inside">
@@ -29,13 +29,31 @@
       </ul>
     </div>
 
-    <div class="mt-6 m-2">
-      子ども一覧
+    <div class="mt-10">
+      <span class="font-bold">子ども一覧</span>
     </div>
-    <div>
-      <%= button_to "子どもの情報を編集", root_path, method: :get, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2 m-2" %>
-      <%= button_to "子どもの情報を追加", root_path, method: :get, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2 m-2" %>
+    <div class="my-2">
+      <ul class="list-disc list-inside">
+        <% @family.children.each do |child| %>
+          <li>
+            <%= child.name %>
+          </li>
+        <% end %>
+      </ul>
     </div>
+    <% if @family.children.count > 0 && current_user.id == @family.owner_id %>
+      <div>
+        <%= button_to "子どもの情報を編集・削除", family_children_path(family_id: @family.id), method: :get, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2 m-2" %>
+        <%= button_to "子どもの情報を追加", new_family_child_path(family_id: @family.id), method: :get, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2 m-2" %>
+      </div>
+    <% elsif current_user.id == @family.owner_id %>
+      <div>
+        <%= button_to "子どもの情報を追加", new_family_child_path(family_id: @family.id), method: :get, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2 m-2" %>
+      </div>
+    <% end %>
   </div>
 
+  <div class="mt-8">
+    <%= link_to "戻る", family_path(@family) %>
+  </div>
 </div>
