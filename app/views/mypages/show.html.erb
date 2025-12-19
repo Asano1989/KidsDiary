@@ -47,7 +47,7 @@
 
     <div class="mt-8 grid grid-cols-2 gap-4 place-items-center">
       <div id="user_edit_button" class="">
-        <%= button_to "ユーザー情報を確認", root_path, method: :get, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2.5" %>
+        <%= button_to "ユーザー情報を確認", edit_mypage_path, method: :get, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2.5" %>
       </div>
       <div id="group_button">
         <% if current_user.family.present? %>
