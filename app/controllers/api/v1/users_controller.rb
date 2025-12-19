@@ -55,7 +55,7 @@ module Api
               supabase_uid: user_params[:supabase_uid],
               email: user_params[:email],
               name: user_params[:name].presence || user_params[:email].split('@').first || "ユーザー",
-              birthday: user_params[:birthday].presence # nilまたは空文字列の場合はnilになる
+              birthday: user_params[:birthday].presence, # nilまたは空文字列の場合はnilになる
               avatar: user_params[:avatar].presence
             }
 
