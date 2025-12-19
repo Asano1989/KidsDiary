@@ -9,8 +9,9 @@ Rails.application.routes.draw do
   get 'mypage', to: 'my_pages#show'
 
   scope module: :families do
-    resources :families do
+    resources :families  do
       resources :members, only: [:index, :new, :create, :destroy]
+      resources :children, only: [:new, :create]
     end
   end
     
