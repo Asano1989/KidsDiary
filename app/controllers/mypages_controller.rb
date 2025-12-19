@@ -1,4 +1,4 @@
-class MyPagesController < ApplicationController
+class MypagesController < ApplicationController
   before_action :require_login
     
   def show
@@ -11,7 +11,33 @@ class MyPagesController < ApplicationController
     # app/views/my_pages/show.html.erb がレンダリングされる
   end
 
+  def edit
+    @user = current_user
+  end
+
+  def update
+    @user = current_user
+    
+    # Rails側のDBを更新
+    if @user.update(user_params)
+      # Supabase側のデータを更新
+      sync_to_supabase(@user)
+      
+      redirect_to mypage_path, notice: "プロフィールを更新しました。"
+    else
+      render :edit, status: :unprocessable_entity
+    end
+  end
+
   private
+
+  def user_params
+    params.require(:user).permit(:name, :birthday, :avatar)
+  end
+
+  def sync_to_supabase(user)
+    SupabaseSyncService.new(user).call
+  end
 
   # Supabaseからプロフィールを取得する（仮メソッド）
   def fetch_supabase_profile_data(supabase_uid)
@@ -20,13 +46,10 @@ class MyPagesController < ApplicationController
     
     # 例: データをフェッチするまで、メールアドレスとUIDを仮データとして返す
     {
-      name: @user.email.split('@').first, # デフォルト名
+      name: @user.email.split('@').first,
       email: @user.email,
       supabase_uid: supabase_uid
     }
-    
-    # 開発を簡略化するため、一時的にRailsのユーザーデータのみで表示することも可能
-    # return {}
   end
 
 end

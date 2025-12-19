@@ -6,7 +6,7 @@ Rails.application.routes.draw do
   post 'auth/set_cookie', to: 'auth#set_cookie'
   get 'auth/current_header', to: 'auth#current_header'
   
-  get 'mypage', to: 'my_pages#show'
+  resource :mypage, only: [:show, :edit, :update]
 
   scope module: :families do
     resources :families  do
