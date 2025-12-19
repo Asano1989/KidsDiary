@@ -121,7 +121,7 @@ const useAuthLogic = () => {
         // Rails側でログアウトされた場合、Supabaseセッションも強制的に破棄
         supabase.auth.signOut();
         
-        // 💡 URLからパラメータを削除して、リロード後に二度実行されるのを防ぐ
+        // URLからパラメータを削除し、リロード後に二度実行されるのを防ぐ
         window.history.replaceState(null, '', window.location.pathname);
     }
 
@@ -132,8 +132,7 @@ const useAuthLogic = () => {
           setLoading(false);
 
           if (session) {
-            // 💡 修正ポイント：SIGNED_UP（新規登録直後）は、
-            // ここでの自動同期を「絶対に」行わず、SignUpForm 側の処理にすべて任せる
+            // SIGNED_UP（新規登録直後）は自動同期を絶対に行わず、SignUpForm 側の処理にすべて任せる
             if (event === 'SIGNED_UP') {
               console.log("Blocking automatic sync for SIGNED_UP event");
               return;
@@ -178,7 +177,7 @@ const useAuthLogic = () => {
         // 2. ローカルの状態をリセット
         setRailsSynced(false);
         
-        // 💡 修正点: ログアウト処理完了後、ルートページへ強制リロード
+        // 3. ログアウト処理完了後、ルートページへ強制リロード
         window.location.href = '/';
       }
     } else {
