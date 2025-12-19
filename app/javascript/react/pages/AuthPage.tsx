@@ -12,6 +12,7 @@ type AuthSuccessParams = {
     session: Session;
     displayName?: string;
     birthdayValue?: string;
+    avatarFile?: File;
 }
 
 const useAuthLogic = () => {
@@ -27,7 +28,7 @@ const useAuthLogic = () => {
   }, [railsSynced]);
 
   // ログイン成功時にRails DBとの連携とユーザープロファイルの取得を実行
-  const handleAuthSuccess = useCallback(async ({ session, displayName, birthdayValue }: AuthSuccessParams) => {
+  const handleAuthSuccess = useCallback(async ({ session, displayName, birthdayValue, avatarFile }: AuthSuccessParams) => {
     if (railsSyncedRef.current) return;
   
     if (!session || !session.user) {
@@ -54,6 +55,15 @@ const useAuthLogic = () => {
     const expires = new Date();
     expires.setDate(expires.getDate() + 7); // 有効期限: 7日間
 
+    const formData = new FormData();
+    formData.append('user[supabase_uid]', session.user.id);
+    formData.append('user[email]', session.user.email || '');
+    if (displayName) formData.append('user[name]', displayName);
+    if (birthdayValue) formData.append('user[birthday]', birthdayValue);
+    if (avatarFile) {
+      formData.append('user[avatar]', avatarFile);
+    }
+
     // jwtToken を使用 (ReferenceError解消)
     // document.cookie = `${RAIL_COOKIE_KEY}=${jwtToken}; path=/; expires=${expires.toUTCString()}; secure=${window.location.protocol === 'https:'}; samesite=Lax`;
 
@@ -76,10 +86,9 @@ const useAuthLogic = () => {
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
             'Authorization': `Bearer ${jwtToken}`,
         },
-        body: JSON.stringify(body),
+        body: formData,
       });
 
       if (!response.ok) {

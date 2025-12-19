@@ -11,6 +11,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleForm }) => {
   const [passwordConfirm, setPasswordConfirm] = useState(''); // パスワード確認
   const [displayName, setDisplayName] = useState(''); // 表示名
   const [birthday, setBirthday] = useState(''); // 誕生日（任意）
+  const [avatar, setAvatar] = useState<File | null>(null); // プロフィール画像（任意）
   
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -68,7 +69,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleForm }) => {
 
         // 3. 全ての処理が成功
         setMessage('登録に成功しました。ログイン画面へ移動します。');
-        onToggleForm(displayName, birthday); // ログイン画面へ遷移
+        onToggleForm(displayName, birthday, avatar || undefined); // ログイン画面へ遷移
         
       } else {
         // メール検証が必要でセッションが確立されていない場合
@@ -150,6 +151,24 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleForm }) => {
           value={birthday}
           onChange={(e) => setBirthday(e.target.value)}
           className="w-full p-2 border border-gray-400 rounded-lg focus:ring-gray-600 focus:border-gray-600"
+        />
+      </div>
+
+      {/* プロフィール画像（任意） */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="avatar">
+          プロフィール画像
+        </label>
+        <input
+          id="avatar"
+          type="file"
+          accept="image/*"
+          onChange={(e) => {
+            if (e.target.files && e.target.files[0]) {
+              setAvatar(e.target.files[0]);
+            }
+          }}
+          className="w-full p-2 border border-gray-400 rounded-lg"
         />
       </div>
 

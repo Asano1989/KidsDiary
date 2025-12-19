@@ -4,7 +4,7 @@ module Api
       before_action :authenticate_user!
 
       def user_link_params
-        params.require(:user).permit(:supabase_uid, :email, :name, :birthday)
+        params.require(:user).permit(:supabase_uid, :email, :name, :birthday, :avatar)
       end
 
       # POST /api/v1/users/register_on_rails
@@ -20,6 +20,7 @@ module Api
             update_data = {}
             update_data[:name] = user_params[:name] if user_params[:name].present?
             update_data[:birthday] = user_params[:birthday].presence if user_params[:birthday] # .presenceで空文字列をnilに
+            update_data[:avatar] = user_params[:avatar].presence if user_params[:avatar]
 
             if update_data.empty? || user.update(update_data)
                 render json: { success: true, message: 'User updated or already linked by UID.' }, status: :ok
@@ -37,6 +38,7 @@ module Api
             update_data = { supabase_uid: user_params[:supabase_uid] }
             update_data[:name] = user_params[:name] if user_params[:name].present?
             update_data[:birthday] = user_params[:birthday] if user_params[:birthday].present?
+            update_data[:avatar] = user_params[:avatar] if user_params[:avatar].present?
 
             if user_by_email.update(update_data)
               render json: { success: true, message: 'User linked by Email.' }, status: :ok
@@ -54,6 +56,7 @@ module Api
               email: user_params[:email],
               name: user_params[:name].presence || user_params[:email].split('@').first || "ユーザー",
               birthday: user_params[:birthday].presence # nilまたは空文字列の場合はnilになる
+              avatar: user_params[:avatar].presence
             }
 
             new_user = User.create(final_params)
