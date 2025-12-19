@@ -355,7 +355,7 @@ DEPENDENCIES
   selenium-webdriver
   sprockets-rails
   stimulus-rails
-  supabase
+  supabase (~> 0.1.0)
   turbo-rails
   tzinfo-data
   web-console
