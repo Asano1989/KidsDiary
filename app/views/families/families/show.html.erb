@@ -52,9 +52,13 @@
         <% end %>
       </ul>
     </div>
-    <% if  current_user.id == @family.owner_id %>
+    <% if @family.children.count > 0 && current_user.id == @family.owner_id %>
       <div>
-        <%= button_to "子どもの情報を削除", root_path, method: :get, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2 m-2" %>
+        <%= button_to "子どもの情報を編集・削除", family_children_path(family_id: @family.id), method: :get, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2 m-2" %>
+        <%= button_to "子どもの情報を追加", new_family_child_path(family_id: @family.id), method: :get, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2 m-2" %>
+      </div>
+    <% elsif current_user.id == @family.owner_id %>
+      <div>
         <%= button_to "子どもの情報を追加", new_family_child_path(family_id: @family.id), method: :get, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2 m-2" %>
       </div>
     <% end %>
