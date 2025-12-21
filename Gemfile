@@ -51,6 +51,8 @@ gem "aws-sdk-s3", '~> 1.208', require: false
 
 gem 'config', '~> 5.6'
 
+gem 'resend', '~> 0.10.0'
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ]
