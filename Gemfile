@@ -26,12 +26,6 @@ gem "stimulus-rails"
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
 gem "jbuilder"
 
-# Use Redis adapter to run Action Cable in production
-# gem "redis", ">= 4.0.1"
-
-# Use Kredis to get higher-level data types in Redis [https://github.com/rails/kredis]
-# gem "kredis"
-
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
 # gem "bcrypt", "~> 3.1.7"
 
@@ -53,12 +47,17 @@ gem 'supabase', '~> 0.1.0'
 gem 'faraday', '~> 2.14.0'
 
 gem 'mini_magick', '~> 5.3.1'
-gem "aws-sdk-s3", require: false
+gem "aws-sdk-s3", '~> 1.208', require: false
+
+gem 'config', '~> 5.6'
+
+gem 'resend', '~> 0.10.0'
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ]
   gem 'dotenv-rails'
+  gem 'letter_opener_web'
 end
 
 group :development do

@@ -98,4 +98,6 @@ Rails.application.configure do
   config.hosts << "tsumugi.h73a.com"
 
   config.active_storage.service = :cloudflare
+
+  config.action_mailer.delivery_method = :resend
 end
