@@ -1,4 +1,5 @@
 class Diary < ApplicationRecord
-  belongs_to :user
-  belongs_to :emoji
+  elongs_to :user
+  
+  validates :date, :body, presence: true
 end
