@@ -28,9 +28,9 @@ class DiariesController < ApplicationController
   end
 
   def check_family
-  if current_user.family_id.blank?
-    # 家族に所属していない場合はトップページにリダイレクト
-    redirect_to root_path, alert: '家族への登録が必要です。'
+    if current_user.family_id.blank?
+      # 家族に所属していない場合はトップページにリダイレクト
+      redirect_to root_path, alert: '家族への登録が必要です。'
+    end
   end
-end
 end
