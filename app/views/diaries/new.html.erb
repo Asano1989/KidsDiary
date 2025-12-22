@@ -1,0 +1,43 @@
+<div id="new_diary" class="text-center">
+  <h1 class="text-3xl font-bold m-6">日記を新規投稿</h1>
+
+  <div id="diary_form">
+    <%= form_with model: @diary, url: root_path, method: :post, local: true do |f| %>
+    <div class="my-4">
+      <div>
+        <%= f.label :date, "日付", class: "font-bold" %>
+      </div>
+      <div>
+        <%= f.date_field :date, class: "border border-default-medium rounded-base" %>
+      </div>
+    </div>
+    <div class="my-4">
+      <div>
+        <%= f.label :child_id, "どの子？", class: "font-bold" %>
+      </div>
+      <div>
+        <%= f.select :child_id, options_from_collection_for_select(@children, :id, :name), include_blank: "選択して下さい", class: "border border-default-medium rounded-base" %>
+      </div>
+    </div>
+    <div class="my-4">
+        <%= f.label :emoji_id, "絵文字", class: "font-bold" %>
+      </div>
+      <div>
+        <%= f.select :emoji_id, options_from_collection_for_select(@emojis, :id, :character), include_blank: "選択して下さい", class: "border border-default-medium rounded-base" %>
+      </div>
+    </div>
+    <div class="my-4">
+      <div>
+        <%= f.label :body, "本文", class: "font-bold" %>
+      </div>
+      <div>
+        <%= f.text_area :body, class: "border border-default-medium rounded-base" %>
+      </div>
+    </div>
+    <div class="my-4">
+      <%= f.submit "投稿する", class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2.5" %>
+    </div>
+    <% end %>
+  </div>
+
+</div>
