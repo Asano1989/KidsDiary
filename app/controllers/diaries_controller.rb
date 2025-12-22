@@ -3,29 +3,28 @@ class DiariesController < ApplicationController
   before_action :check_family, only: [:new, :create]
   
   def new
-    @user = current_user
     @diary = Diary.new
-
-    @children = Child.where(family_id: @user.family_id)
+    @children = Child.where(family_id: current_user.family_id)
     @emojis = Emoji.all
   end
 
   def create
-    @user = current_user
     @diary = Diary.new(diary_params)
-    @diary.user_id = @user.id
+    @diary.user_id = current_user.id
     if @diary.save
-      redirect_to root_path
+      redirect_to root_path, notice: '日記を投稿しました！'
     else
+      @children = Child.where(family_id: current_user.family_id)
+      @emojis = Emoji.all
       flash.now[:alert] = '日記の投稿に失敗しました。'
-      render `diaries/new`
+      render :new, status: :unprocessable_entity
     end
   end
 
   private
 
   def diary_params
-    params.require(:diary).permit(:date, :@user_id, :emoji_id, :body)
+    params.require(:diary).permit(:date, :emoji_id, :body)
   end
 
   def check_family
