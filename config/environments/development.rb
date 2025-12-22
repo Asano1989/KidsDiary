@@ -83,4 +83,6 @@ Rails.application.configure do
 
   # メールのリンク生成に使用するホスト設定
   config.action_mailer.default_url_options = Settings.default_url_options.to_h
+
+  config.action_mailer.delivery_method = :resend
 end
