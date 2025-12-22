@@ -14,6 +14,8 @@ Rails.application.routes.draw do
       resources :children, only: [:index, :new, :create, :edit, :update, :destroy]
     end
   end
+
+  resources :diaries, only: [:new, :create]
     
   # APIエンドポイントの定義
   namespace :api do

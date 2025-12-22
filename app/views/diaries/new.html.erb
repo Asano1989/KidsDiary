@@ -2,7 +2,7 @@
   <h1 class="text-3xl font-bold m-6">日記を新規投稿</h1>
 
   <div id="diary_form">
-    <%= form_with model: @diary, url: root_path, method: :post, local: true do |f| %>
+    <%= form_with model: @diary, url: diaries_path, method: :post, local: true do |f| %>
     <div class="my-4">
       <div>
         <%= f.label :date, "日付", class: "font-bold" %>
@@ -16,7 +16,7 @@
         <%= f.label :child_id, "どの子？", class: "font-bold" %>
       </div>
       <div>
-        <%= f.select :child_id, options_from_collection_for_select(@children, :id, :name), include_blank: "選択してください", class: "border border-default-medium rounded-base" %>
+        <!-- %= f.select :child_id, options_from_collection_for_select(@children, :id, :name), include_blank: "選択してください", class: "border border-default-medium rounded-base" % -->
       </div>
     </div>
     <div class="my-4">
