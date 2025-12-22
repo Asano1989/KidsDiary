@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase, Session, AuthChangeEvent } from '../supabaseClient';
 import SignUpForm from '../components/SignUpForm';
 import SignInForm from '../components/SignInForm';
+import ForgotPasswordForm from '../components/ForgotPasswordForm';
+import UpdatePasswordForm from '../components/UpdatePasswordForm';
 
 interface UserProfile {
   name: string;
@@ -196,23 +198,33 @@ const useAuthLogic = () => {
 
 const AuthPage: React.FC = () => {
   const { session, userProfile, loading, handleSignOut, handleAuthSuccess } = useAuthLogic();
+  const [view, setView] = useState<'signIn' | 'signUp' | 'forgotPassword' | 'updatePassword'>('signIn');
 
-  // true: サインインフォームを表示, false: サインアップフォームを表示
-  const [isSignIn, setIsSignIn] = useState<boolean>(true);
+  useEffect(() => {
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, _session) => {
+      console.log("Auth Event:", event); // デバッグ用
+      if (event === 'PASSWORD_RECOVERY') {
+        setView('updatePassword');
+      }
+    });
+    return () => authListener.subscription.unsubscribe();
+  }, []);
 
-  if (loading) {
+  if (loading) return <div className="h-full flex items-center justify-center text-gray-700">ロード中...</div>;
+
+  // --- 1. パスワード更新画面 (最優先) ---
+  // セッションの有無より先に判定することで、リカバリーモードを確実に表示させます
+  if (view === 'updatePassword') {
     return (
-      <div className="h-full flex items-center justify-center text-gray-700">
-        ロード中...
+      <div className="w-full max-w-md mx-auto">
+        <UpdatePasswordForm />
       </div>
     );
   }
 
-  // --- ログイン後の表示 ---
+  // --- 2. ログイン済み画面 ---
   if (session) {
-    // 1. profiles.name 2. Supabaseユーザーのメールアドレス 3. 'ユーザー'
     const displayName = userProfile?.name || session.user.email || 'ユーザー';
-
     return (
       <div className="h-full w-full max-w-md mx-auto">
         <div className="bg-white p-6 shadow-md rounded-lg text-center space-y-6">
@@ -230,40 +242,37 @@ const AuthPage: React.FC = () => {
     );
   }
 
-  // --- ログイン/登録フォームの表示 ---
+  // --- 3. 認証フォーム（未ログイン状態） ---
   return (
     <div className="w-full max-w-md mx-auto">
-        {isSignIn ? (
+      {view === 'signIn' && (
+        <>
           <SignInForm
-            onToggleForm={() => setIsSignIn(false)}
+            onToggleForm={() => setView('signUp')}
+            onForgotPassword={() => setView('forgotPassword')}
           />
-        ) : (
-          <SignUpForm
-            onToggleForm={async (name, bday, file) => {
-              setIsSignIn(true);
-              const { data: { session: newSession } } = await supabase.auth.getSession();
-              
-              if (newSession) {
-                console.log("Passing to handleAuthSuccess:", { name, bday, hasFile: !!file });
-                await handleAuthSuccess({
-                  session: newSession,
-                  displayName: name,
-                  birthday: bday,
-                  avatarFile: file
-                });
-              }
-            }}
-          />
-        )}
+          <div className="mt-4 text-center">
+            <button onClick={() => setView('signUp')} className="text-sm text-gray-600 hover:text-gray-800">
+              → 新規登録はこちら
+            </button>
+          </div>
+        </>
+      )}
 
-      <div className="h-full w-full mt-4 text-center">
-        <button
-          onClick={() => setIsSignIn(!isSignIn)}
-          className="text-sm text-gray-600 hover:text-gray-800"
-        >
-          {isSignIn ? '→ 新規登録はこちら' : '← ログインはこちら'}
-        </button>
-      </div>
+      {view === 'signUp' && (
+        <>
+          <SignUpForm onToggleForm={() => setView('signIn')} />
+          <div className="mt-4 text-center">
+            <button onClick={() => setView('signIn')} className="text-sm text-gray-600 hover:text-gray-800">
+              ← ログインはこちら
+            </button>
+          </div>
+        </>
+      )}
+
+      {view === 'forgotPassword' && (
+        <ForgotPasswordForm onBack={() => setView('signIn')} />
+      )}
     </div>
   );
 };

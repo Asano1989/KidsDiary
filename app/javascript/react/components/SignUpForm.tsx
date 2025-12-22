@@ -76,8 +76,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleForm }) => {
         // onToggleForm に必要な情報をすべて渡します
         setMessage('登録に成功しました。');
         
-        // ここで avatar を渡す
-        onToggleForm(displayName.trim(), birthday, avatar || undefined);
+        onToggleForm();
         
       } else {
         setMessage('確認メールを送信しました。メール内のリンクをクリックして完了してください。');

@@ -3,9 +3,10 @@ import { supabase } from '../supabaseClient';
 
 interface SignInFormProps {
   onToggleForm: () => void; // ログイン/登録切り替え用
+  onForgotPassword: () => void; // パスワードを忘れた場合用
 }
 
-const SignInForm: React.FC<SignInFormProps> = ({ onToggleForm }) => {
+const SignInForm: React.FC<SignInFormProps> = ({ onToggleForm, onForgotPassword }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -70,6 +71,17 @@ const SignInForm: React.FC<SignInFormProps> = ({ onToggleForm }) => {
           required
           className="w-full p-2 border border-gray-400 rounded-lg focus:ring-gray-600 focus:border-gray-600"
         />
+      </div>
+
+      {/* パスワードを忘れた場合 */}
+      <div className="text-right">
+        <button
+          type="button"
+          onClick={onForgotPassword}
+          className="text-xs text-blue-600 hover:underline"
+        >
+          パスワードをお忘れですか？
+        </button>
       </div>
 
       {/* ログインボタン */}
