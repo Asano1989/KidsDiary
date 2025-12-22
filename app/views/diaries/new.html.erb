@@ -16,14 +16,14 @@
         <%= f.label :child_id, "どの子？", class: "font-bold" %>
       </div>
       <div>
-        <%= f.select :child_id, options_from_collection_for_select(@children, :id, :name), include_blank: "選択して下さい", class: "border border-default-medium rounded-base" %>
+        <%= f.select :child_id, options_from_collection_for_select(@children, :id, :name), include_blank: "選択してください", class: "border border-default-medium rounded-base" %>
       </div>
     </div>
     <div class="my-4">
         <%= f.label :emoji_id, "絵文字", class: "font-bold" %>
       </div>
       <div>
-        <%= f.select :emoji_id, options_from_collection_for_select(@emojis, :id, :character), include_blank: "選択して下さい", class: "border border-default-medium rounded-base" %>
+        <%= f.select :emoji_id, options_from_collection_for_select(@emojis, :id, :character), include_blank: "選択してください", class: "border border-default-medium rounded-base" %>
       </div>
     </div>
     <div class="my-4">
