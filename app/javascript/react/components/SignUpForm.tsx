@@ -40,49 +40,42 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleForm }) => {
     }
 
     try {
-      // 1. Supabaseでユーザー登録を実行
+      // 1. Supabase登録
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ 
         email,
         password
       });
-
       if (signUpError) throw signUpError;
-      
-      // signUpData からセッションを確認
-      const session = signUpData.session;
-      
-      // 2. プロファイルデータ（表示名、誕生日）をProfilesテーブルに登録
-      // セッションが即時取得できない場合を考慮して user を取得
-      const user = session?.user || await waitForSession();
+
+      const user = signUpData.session?.user || await waitForSession();
       
       if (user) {
-        // Supabaseのprofilesテーブルへの保存（既存通り）
+        // 2. Supabase側のProfilesテーブル保存
         const { error: profileError } = await supabase
           .from('profiles')
-          .insert([
-            {
-              id: user.id,
-              name: displayName.trim(),
-              birthday: birthday || null,
-            },
-          ]);
+          .insert([{
+            id: user.id,
+            name: displayName.trim(),
+            birthday: birthday || null,
+          }]);
         
-        if (profileError) {
-          console.error("Profile creation failed:", profileError);
-          throw new Error('プロファイル作成に失敗しました。');
-        }
+        if (profileError) throw profileError;
 
-        // 3. 重要：Rails側への同期処理を呼び出す
-        // onToggleForm に必要な情報をすべて渡します
+        // 3. 【重要】Rails同期用の関数を呼ぶ
+        // signUpData.session があればそれを使い、なければ再取得
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session) {
+          // AuthPageから渡された onToggleForm (handleAuthSuccessをラップしたもの) を実行
+          // ここでフォームにある最新のステート値を直接渡す
+          await onToggleForm(displayName.trim(), birthday, avatar || undefined);
+        }
+        
         setMessage('登録に成功しました。');
-        
-        // ここで avatar を渡す
-        onToggleForm(displayName.trim(), birthday, avatar || undefined);
-        
+
       } else {
         setMessage('確認メールを送信しました。メール内のリンクをクリックして完了してください。');
       }
-
     } catch (err: any) {
       console.error('Sign Up Error:', err);
       setError(err.message || '登録中にエラーが発生しました。');

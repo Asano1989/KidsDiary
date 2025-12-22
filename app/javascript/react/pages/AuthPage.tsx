@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase, Session, AuthChangeEvent } from '../supabaseClient';
 import SignUpForm from '../components/SignUpForm';
 import SignInForm from '../components/SignInForm';
+import ForgotPasswordForm from '../components/ForgotPasswordForm';
+import UpdatePasswordForm from '../components/UpdatePasswordForm';
 
 interface UserProfile {
   name: string;
@@ -127,26 +129,25 @@ const useAuthLogic = () => {
 
     // 1. Supabaseのイベントリスナー
     const { data: authListener } = supabase.auth.onAuthStateChange(
-        async (event: AuthChangeEvent, session: Session | null) => {
-          setSession(session);
-          setLoading(false);
+      async (event: AuthChangeEvent, session: Session | null) => {
+        setSession(session);
+        setLoading(false);
 
-          if (session) {
-            // SIGNED_UP（新規登録直後）は自動同期を絶対に行わず、SignUpForm 側の処理にすべて任せる
-            if (event === 'SIGNED_UP') {
-              console.log("Blocking automatic sync for SIGNED_UP event");
-              return;
-            }
+        if (session) {
+          // 【重要修正】
+          // SIGNED_UP（登録直後）だけでなく、その後の自動ログインも
+          // SignUpForm 側で処理をしている間は、ここでの自動同期をスキップ
+          if (event === 'SIGNED_UP') return;
 
-            // 通常のログイン（SIGNED_IN）時のみ、Railsと同期する
-            if (event === 'SIGNED_IN' && !railsSyncedRef.current) {
-              // 既存ユーザーのログイン時は画像などは不要なので空でOK
-              handleAuthSuccess({ session });
-              railsSyncedRef.current = true;
-            }
+          // すでに同期済み、または新規登録フロー中（railsSyncedRefがfalse）は
+          // 勝手に同期を走らせないように条件を厳しくする
+          if (event === 'SIGNED_IN' && !railsSyncedRef.current) {
+            // 通常のログイン（既にDBにユーザーがいる場合）のみ実行
+            handleAuthSuccess({ session });
           }
         }
-      );
+      }
+    );
 
     supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
       setSession(initialSession);
@@ -196,23 +197,33 @@ const useAuthLogic = () => {
 
 const AuthPage: React.FC = () => {
   const { session, userProfile, loading, handleSignOut, handleAuthSuccess } = useAuthLogic();
+  const [view, setView] = useState<'signIn' | 'signUp' | 'forgotPassword' | 'updatePassword'>('signIn');
 
-  // true: サインインフォームを表示, false: サインアップフォームを表示
-  const [isSignIn, setIsSignIn] = useState<boolean>(true);
+  useEffect(() => {
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, _session) => {
+      console.log("Auth Event:", event); // デバッグ用
+      if (event === 'PASSWORD_RECOVERY') {
+        setView('updatePassword');
+      }
+    });
+    return () => authListener.subscription.unsubscribe();
+  }, []);
 
-  if (loading) {
+  if (loading) return <div className="h-full flex items-center justify-center text-gray-700">ロード中...</div>;
+
+  // --- 1. パスワード更新画面 (最優先) ---
+  // セッションの有無より先に判定することで、リカバリーモードを確実に表示させます
+  if (view === 'updatePassword') {
     return (
-      <div className="h-full flex items-center justify-center text-gray-700">
-        ロード中...
+      <div className="w-full max-w-md mx-auto">
+        <UpdatePasswordForm />
       </div>
     );
   }
 
-  // --- ログイン後の表示 ---
+  // --- 2. ログイン済み画面 ---
   if (session) {
-    // 1. profiles.name 2. Supabaseユーザーのメールアドレス 3. 'ユーザー'
     const displayName = userProfile?.name || session.user.email || 'ユーザー';
-
     return (
       <div className="h-full w-full max-w-md mx-auto">
         <div className="bg-white p-6 shadow-md rounded-lg text-center space-y-6">
@@ -230,40 +241,52 @@ const AuthPage: React.FC = () => {
     );
   }
 
-  // --- ログイン/登録フォームの表示 ---
+  // --- 3. 認証フォーム（未ログイン状態） ---
   return (
     <div className="w-full max-w-md mx-auto">
-        {isSignIn ? (
+      {view === 'signIn' && (
+        <>
           <SignInForm
-            onToggleForm={() => setIsSignIn(false)}
+            onToggleForm={() => setView('signUp')}
+            onForgotPassword={() => setView('forgotPassword')}
           />
-        ) : (
-          <SignUpForm
+          <div className="mt-4 text-center">
+            <button onClick={() => setView('signUp')} className="text-sm text-gray-600 hover:text-gray-800">
+              → 新規登録はこちら
+            </button>
+          </div>
+        </>
+      )}
+
+      {view === 'signUp' && (
+        <>
+          <SignUpForm 
             onToggleForm={async (name, bday, file) => {
-              setIsSignIn(true);
-              const { data: { session: newSession } } = await supabase.auth.getSession();
-              
-              if (newSession) {
-                console.log("Passing to handleAuthSuccess:", { name, bday, hasFile: !!file });
+              // セッションを最新状態で取得
+              const { data: { session: currentSession } } = await supabase.auth.getSession();
+              if (currentSession) {
+                // 名前や誕生日を明示的に指定してRailsへ送る
                 await handleAuthSuccess({
-                  session: newSession,
+                  session: currentSession,
                   displayName: name,
                   birthday: bday,
                   avatarFile: file
                 });
               }
-            }}
+              setView('signIn'); // 同期が終わったらログイン画面へ（またはトップへ）
+            }} 
           />
-        )}
+          <div className="mt-4 text-center">
+            <button onClick={() => setView('signIn')} className="text-sm text-gray-600 hover:text-gray-800">
+              ← ログインはこちら
+            </button>
+          </div>
+        </>
+      )}
 
-      <div className="h-full w-full mt-4 text-center">
-        <button
-          onClick={() => setIsSignIn(!isSignIn)}
-          className="text-sm text-gray-600 hover:text-gray-800"
-        >
-          {isSignIn ? '→ 新規登録はこちら' : '← ログインはこちら'}
-        </button>
-      </div>
+      {view === 'forgotPassword' && (
+        <ForgotPasswordForm onBack={() => setView('signIn')} />
+      )}
     </div>
   );
 };
