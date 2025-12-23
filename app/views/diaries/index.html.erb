@@ -14,8 +14,8 @@
         </tr>
       <% @diaries.each do |diary| %>
         <tr>
-          <td class="border-collapse border p-2"><%= diary.id %></td>
-          <td class="border-collapse border p-2"><%= diary.date %></td>
+          <td class="border-collapse border p-2"><%= link_to diary.id, diary_path(diary.id) %></td>
+          <td class="border-collapse border p-2"><%= link_to diary.date, diary_path(diary.id) %></td>
           <td class="border-collapse border p-2"><%= diary.user.family_id %></td>
           <td class="border-collapse border p-2"><%= diary.user.name %></td>
           <td class="border-collapse border p-2"><%= diary.emoji.character %></td>
