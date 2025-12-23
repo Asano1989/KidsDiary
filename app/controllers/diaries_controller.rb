@@ -1,6 +1,6 @@
 class DiariesController < ApplicationController
   before_action :require_login
-  before_action :check_family, only: [:new, :create]
+  before_action :check_family, only: [:index, :show, :new, :create]
   
   def index
     @diaries = current_user.family.diaries.order(date: :desc)
