@@ -33,6 +33,7 @@ class DiariesController < ApplicationController
   def edit
     @children = Child.where(family_id: current_user.family_id)
     @emojis = Emoji.all
+    @emoji = @diary.emoji
   end
 
   def update

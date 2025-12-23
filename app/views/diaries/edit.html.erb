@@ -2,7 +2,7 @@
   <h1 class="text-3xl font-bold m-6">日記を編集</h1>
 
   <div id="diary_edit_form">
-    <%= form_with model: @diary, url: diary_path, local: true do |f| %>
+    <%= form_with model: @diary, url: diary_path(diary_id: @diary.id), local: true do |f| %>
     <div class="my-4">
       <div>
         <%= f.label :date, "日付", class: "font-bold" %>
@@ -16,14 +16,14 @@
         <%= f.label :child_id, "どの子？", class: "font-bold" %>
       </div>
       <div>
-        <!-- %= f.select :child_id, options_from_collection_for_select(@children, :id, :name), include_blank: "選択してください", class: "border border-default-medium rounded-base" % -->
+        <!-- %= f.select :child_id, options_from_collection_for_select(@children, :id, :name, { :selected => @child.id }), include_blank: "選択してください", class: "border border-default-medium rounded-base" % -->
       </div>
     </div>
     <div class="my-4">
         <%= f.label :emoji_id, "絵文字", class: "font-bold" %>
       </div>
       <div>
-        <%= f.select :emoji_id, options_from_collection_for_select(@emojis, :id, :character), include_blank: "選択してください", class: "border border-default-medium rounded-base" %>
+        <%= f.select :emoji_id, options_from_collection_for_select(@emojis, :id, :character, { :selected => @emoji.id }), include_blank: "選択してください", class: "border border-default-medium rounded-base" %>
       </div>
     </div>
     <div class="my-4">
@@ -41,6 +41,6 @@
   </div>
 
   <div class="text-center">
-    <%= button_to "削除する", diary_path(@diary), data: { turbo_method: :delete, turbo_confirm: '本当にこの日記を削除しますか？' }, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2 m-2" %>
+    <%= button_to "削除する", diary_path(@diary.id), method: :delete, data: { turbo_confirm: '本当にこの日記を削除しますか？' }, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2 m-2" %>
   </div>
 </div>
