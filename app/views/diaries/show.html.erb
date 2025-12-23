@@ -32,8 +32,20 @@
           <th class="border-collapse border p-2">body</th>
           <td class="border-collapse border p-2"><%= @diary.body %></td>
         </tr>
+        <% if current_user.id == @diary.user_id %>
+        <tr>
+          <td colspan="2">
+            <div class="flex p-2">
+              <div class="flex-auto">
+                <%= button_to "編集", edit_diary_path(diary_id: @diary.id), method: :get, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2 m-2" %>
+              </div>
+              <div class="flex-auto">
+                <%= button_to "削除", edit_diary_path(diary_id: @diary.id), method: :get, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2 m-2" %>
+              </div>
+          </td>
+        </tr>
+        <% end %>
       </tbody>
     </table>
   </div>
-
 </div>
