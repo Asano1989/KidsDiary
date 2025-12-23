@@ -1,7 +1,21 @@
 <div id="diary_index" class="text-center">
   <h1 class="text-3xl font-bold m-6">日記一覧</h1>
 
-  <div id="diary_list">
+  <div id="diary_calendar" class="mx-4 my-8">
+    <div class="text-center">
+      <%= month_calendar(attribute: :date, events: @diaries) do |date, diary| %>
+        <%= date.day %>
+
+        <% diary.each do |d| %>
+          <div>
+            <%= link_to d.emoji.character, diary_path(d.id) %>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+
+  <div id="diary_list" class="m-8">
     <table class="mx-auto border-collapse border">
       <tbody>
         <tr>
