@@ -1,0 +1,39 @@
+<div id="diary_show" class="text-center">
+  <h1 class="text-3xl font-bold m-6">日記の詳細</h1>
+
+  <div id="diary_detail">
+    <table class="mx-auto border-collapse border">
+      <tbody>
+        <tr>
+          <th class="border-collapse border p-2">id</th>
+          <td class="border-collapse border p-2"><%= @diary.id %></td>
+        </tr>
+        <tr>
+          <th class="border-collapse border p-2">date</th>
+          <td class="border-collapse border p-2"><%= @diary.date %></td>
+        </tr>
+        <tr>
+          <th class="border-collapse border p-2">user's<br/>family_id</th>
+          <td class="border-collapse border p-2"><%= @diary.user.family_id %></td>
+        </tr>
+        <tr>
+          <th class="border-collapse border p-2">user</th>
+          <td class="border-collapse border p-2"><%= @diary.user.name %></td>
+        </tr>
+        <tr>
+          <th class="border-collapse border p-2">emoji's id</th>
+          <td class="border-collapse border p-2"><%= @diary.emoji.id %></td>
+        </tr>
+        <tr>
+          <th class="border-collapse border p-2">emoji</th>
+          <td class="border-collapse border p-2"><%= @diary.emoji.character %></td>
+        </tr>
+        <tr>
+          <th class="border-collapse border p-2">body</th>
+          <td class="border-collapse border p-2"><%= @diary.body %></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
