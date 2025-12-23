@@ -12,19 +12,19 @@
           <%= link_to t('simple_calendar.following', default: 'Following'), url_for(params.permit(:start_date).to_h.merge(start_date: start_date.beginning_of_month + 1.year)) %>
         </div>
       </div>
-      <div>
-        <time datetime="<%= start_date.strftime('%Y-%m') %>" class="calendar-title"><%= t('date.month_names')[start_date.month] %></time>
-      </div>
       <div class="flex justify-center">
         <div class="px-2">
           <%= link_to t('simple_calendar.previous', default: 'Previous'), url_for(params.permit(:start_date).to_h.merge(start_date: start_date.beginning_of_month - 1.month)) %>
         </div>
         <div class="px-2">
-          <%= link_to t('simple_calendar.today', default: 'Today'), calendar.url_for_today_view %>
+          <time datetime="<%= start_date.strftime('%Y-%m') %>" class="calendar-title"><%= t('date.month_names')[start_date.month] %></time>
         </div>
         <div class="px-2">
           <%= link_to t('simple_calendar.next', default: 'Next'), url_for(params.permit(:start_date).to_h.merge(start_date: start_date.beginning_of_month + 1.month)) %>
         </div>
+      </div>
+      <div>
+        <%= link_to t('simple_calendar.today', default: 'Today'), calendar.url_for_today_view %>
       </div>
     </nav>
   </div>
@@ -33,7 +33,7 @@
     <thead>
       <tr>
         <% date_range.slice(0, 7).each do |day| %>
-          <th><%= t('date.abbr_day_names')[day.wday] %></th>
+          <th><p class="text-center"><%= t('date.abbr_day_names')[day.wday] %></p></th>
         <% end %>
       </tr>
     </thead>
