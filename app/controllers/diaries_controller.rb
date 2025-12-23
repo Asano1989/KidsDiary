@@ -2,6 +2,10 @@ class DiariesController < ApplicationController
   before_action :require_login
   before_action :check_family, only: [:new, :create]
   
+  def index
+    @diaries = current_user.family.diaries.order(date: :desc)
+  end
+
   def new
     @diary = Diary.new
     @children = Child.where(family_id: current_user.family_id)
