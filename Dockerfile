@@ -18,7 +18,7 @@ FROM base as build
 
 # Node.js 20 (LTS) をインストールする
 RUN apt-get update -qq && \
-    apt-get install -y curl && \
+    apt-get install -y curl build-essential git libpq-dev libvips pkg-config && \
     curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
     apt-get install -y nodejs && \
     npm install -g yarn
