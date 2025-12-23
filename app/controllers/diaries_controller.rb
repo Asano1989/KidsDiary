@@ -6,6 +6,10 @@ class DiariesController < ApplicationController
     @diaries = current_user.family.diaries.order(date: :desc)
   end
 
+  def show
+    @diary = Diary.find(params[:id])
+  end
+
   def new
     @diary = Diary.new
     @children = Child.where(family_id: current_user.family_id)
