@@ -3,7 +3,10 @@ ja:
     previous: "<<"
     next: ">>"
     today: "今日"
+    lastYear: "<"
+    following: ">"
   date:
+    year: "年"
     abbr_day_names:
       - 日
       - 月

@@ -1,11 +1,31 @@
 <div class="simple-calendar">
   <div class="calendar-heading">
-    <time datetime="<%= start_date.strftime('%Y-%m') %>" class="calendar-title"><%= t('date.month_names')[start_date.month] %> <%= start_date.year %></time>
-
     <nav>
-      <%= link_to t('simple_calendar.previous', default: 'Previous'), calendar.url_for_previous_view %>
-      <%= link_to t('simple_calendar.today', default: 'Today'), calendar.url_for_today_view %>
-      <%= link_to t('simple_calendar.next', default: 'Next'), calendar.url_for_next_view %>
+      <div class="flex justify-center">
+        <div class="px-2">
+          <%= link_to t('simple_calendar.lastYear', default: 'LastYear'), url_for(params.permit(:start_date).to_h.merge(start_date: start_date.beginning_of_month - 1.year)) %>
+        </div>
+        <div class="px-2">
+          <span class="calendar-title"><%= start_date.year %> <%= t('date.year') %></span>
+        </div>
+        <div class="px-2">
+          <%= link_to t('simple_calendar.following', default: 'Following'), url_for(params.permit(:start_date).to_h.merge(start_date: start_date.beginning_of_month + 1.year)) %>
+        </div>
+      </div>
+      <div>
+        <time datetime="<%= start_date.strftime('%Y-%m') %>" class="calendar-title"><%= t('date.month_names')[start_date.month] %></time>
+      </div>
+      <div class="flex justify-center">
+        <div class="px-2">
+          <%= link_to t('simple_calendar.previous', default: 'Previous'), url_for(params.permit(:start_date).to_h.merge(start_date: start_date.beginning_of_month - 1.month)) %>
+        </div>
+        <div class="px-2">
+          <%= link_to t('simple_calendar.today', default: 'Today'), calendar.url_for_today_view %>
+        </div>
+        <div class="px-2">
+          <%= link_to t('simple_calendar.next', default: 'Next'), url_for(params.permit(:start_date).to_h.merge(start_date: start_date.beginning_of_month + 1.month)) %>
+        </div>
+      </div>
     </nav>
   </div>
 
