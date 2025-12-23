@@ -24,11 +24,6 @@ RUN apt-get update -qq && \
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y build-essential git libpq-dev libvips pkg-config
 
-RUN yarn cache clean && yarn add react react-dom
-RUN yarn add @supabase/supabase-js
-RUN yarn add @types/react @types/react-dom @types/node
-RUN yarn add -D dotenv
-
 COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile
 
