@@ -13,16 +13,15 @@ ENV RAILS_ENV="production" \
     BUNDLE_PATH="/usr/local/bundle" \
     BUNDLE_WITHOUT="development"
 
-
 # Throw-away build stage to reduce size of final image
 FROM base as build
 
+# Node.js 20 (LTS) をインストールする
 RUN apt-get update -qq && \
-    apt-get install -y nodejs npm && npm install -g yarn
-
-# Install packages needed to build gems
-RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential git libpq-dev libvips pkg-config
+    apt-get install -y curl && \
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y nodejs && \
+    npm install -g yarn
 
 COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile
