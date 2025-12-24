@@ -18,6 +18,9 @@ class DiariesController < ApplicationController
   end
 
   def create
+    if params[:diary][:child_ids].is_a?(String)
+      params[:diary][:child_ids] = params[:diary][:child_ids].split(',')
+    end
     @diary = Diary.new(diary_params)
     @diary.user_id = current_user.id
     if @diary.save
@@ -37,6 +40,9 @@ class DiariesController < ApplicationController
   end
 
   def update
+    if params[:diary][:child_ids].is_a?(String)
+      params[:diary][:child_ids] = params[:diary][:child_ids].split(',')
+    end
     if @diary.update(diary_params)
       redirect_to diary_path(@diary.id), notice: '日記を更新しました。', status: :see_other
     else
@@ -60,7 +66,7 @@ class DiariesController < ApplicationController
   private
 
   def diary_params
-    params.require(:diary).permit(:date, :emoji_id, :body)
+    params.require(:diary).permit(:date, :emoji_id, :body, child_ids: [])
   end
 
   def set_diary
