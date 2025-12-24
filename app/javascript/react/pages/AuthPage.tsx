@@ -20,9 +20,10 @@ type AuthSuccessParams = {
 const useAuthLogic = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [flashMessage, setFlashMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-
   const [railsSynced, setRailsSynced] = useState(false);
+  const [isProcessingSignUp, setIsProcessingSignUp] = useState(false);
 
   const railsSyncedRef = useRef(railsSynced);
   useEffect(() => {
@@ -34,18 +35,25 @@ const useAuthLogic = () => {
     session,
     displayName,
     birthday,
-    avatarFile
+    avatarFile,
+    isSignUp = false
   }: {
     session: Session,
     displayName?: string,
     birthday?: string,
-    avatarFile?: File | null
+    avatarFile?: File | null,
+    isSignUp?: boolean
   }) => {
     // 1. ブロック判定: 名前や画像がある場合は、フラグを無視して実行（新規登録時用）
     const isExplicitUpdate = !!(displayName || avatarFile);
     if (railsSyncedRef.current && !isExplicitUpdate) return true;
 
     try {
+      let finalMessage = "ログインしました。";
+
+      // 新規登録の場合、またはプロファイル更新がある場合のみ Rails 同期を実行
+      const isExplicitUpdate = !!(displayName || avatarFile);
+
       // 2. データの準備 (FormData)
       const formData = new FormData();
       formData.append('user[supabase_uid]', session.user.id);
@@ -65,10 +73,18 @@ const useAuthLogic = () => {
         body: formData,
       });
 
-      if (!response.ok) {
-        console.error("Rails Registration Failed");
-        return false;
+      if (response.ok) {
+        const regData = await response.json();
+        // Rails側が返してきたメッセージをそのまま使う
+        if (regData.message) {
+          finalMessage = regData.message;
+        }
+      } else {
+        // 保存失敗時などのフォールバック
+        finalMessage = "ログインしました。";
       }
+
+      setFlashMessage(finalMessage);
 
       // 4. RailsのCookie設定 (set_cookie)
       const RAIL_API_BASE = process.env.REACT_APP_RAILS_API_BASE_URL || '';
@@ -79,10 +95,6 @@ const useAuthLogic = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ jwt_token: session.access_token }),
       });
-
-      if (!cookieResponse.ok) {
-        console.error('Rails Cookie error');
-      }
 
       // 5. 表示用のプロファイル取得 (Supabaseのprofilesテーブルから)
       const MAX_ATTEMPTS = 5;
@@ -106,6 +118,11 @@ const useAuthLogic = () => {
       // 6. 状態の更新
       setUserProfile({ name: profileName, supabaseUid: session.user.id });
       setRailsSynced(true);
+
+      // 3. メッセージを見せてから遷移
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 1500);
       
       return true;
     } catch (error) {
@@ -134,15 +151,13 @@ const useAuthLogic = () => {
         setLoading(false);
 
         if (session) {
-          // 【重要修正】
-          // SIGNED_UP（登録直後）だけでなく、その後の自動ログインも
-          // SignUpForm 側で処理をしている間は、ここでの自動同期をスキップ
-          if (event === 'SIGNED_UP') return;
+          // 登録処理中(isProcessingSignUpがtrue)なら、ここでは何もしない
+          // SignUpForm側の onToggleForm で handleAuthSuccess を呼ぶため
+          if (event === 'SIGNED_UP' || isProcessingSignUp) {
+            return;
+          }
 
-          // すでに同期済み、または新規登録フロー中（railsSyncedRefがfalse）は
-          // 勝手に同期を走らせないように条件を厳しくする
           if (event === 'SIGNED_IN' && !railsSyncedRef.current) {
-            // 通常のログイン（既にDBにユーザーがいる場合）のみ実行
             handleAuthSuccess({ session });
           }
         }
@@ -157,7 +172,7 @@ const useAuthLogic = () => {
     return () => {
       authListener.subscription.unsubscribe();
     };
-  }, [railsSynced, handleAuthSuccess]);
+  }, [railsSynced, handleAuthSuccess, isProcessingSignUp]);
 
   // ログアウト処理
   const handleSignOut = async () => {
@@ -190,13 +205,23 @@ const useAuthLogic = () => {
     session,
     userProfile,
     loading,
+    flashMessage,
     handleSignOut,
-    handleAuthSuccess
+    handleAuthSuccess,
+    isProcessingSignUp,
+    setIsProcessingSignUp
   };
 };
 
 const AuthPage: React.FC = () => {
-  const { session, userProfile, loading, handleSignOut, handleAuthSuccess } = useAuthLogic();
+  const {
+    session,
+    userProfile,
+    loading,
+    handleSignOut,
+    handleAuthSuccess,
+    flashMessage
+  } = useAuthLogic();
   const [view, setView] = useState<'signIn' | 'signUp' | 'forgotPassword' | 'updatePassword'>('signIn');
 
   useEffect(() => {
@@ -226,9 +251,14 @@ const AuthPage: React.FC = () => {
     const displayName = userProfile?.name || session.user.email || 'ユーザー';
     return (
       <div className="h-full w-full max-w-md mx-auto">
+        {flashMessage && (
+          <div className="mb-4 p-4 bg-green-100 text-green-700 rounded-lg border border-green-200">
+            {flashMessage}
+          </div>
+        )}
         <div className="bg-white p-6 shadow-md rounded-lg text-center space-y-6">
           <h2 className="text-xl font-bold text-gray-800">
-            **{displayName}**さんはログインしています
+            {displayName}さんはログインしています
           </h2>
           <button
             onClick={handleSignOut}
@@ -260,21 +290,25 @@ const AuthPage: React.FC = () => {
 
       {view === 'signUp' && (
         <>
-          <SignUpForm 
+          <SignUpForm
             onToggleForm={async (name, bday, file) => {
-              // セッションを最新状態で取得
-              const { data: { session: currentSession } } = await supabase.auth.getSession();
-              if (currentSession) {
-                // 名前や誕生日を明示的に指定してRailsへ送る
-                await handleAuthSuccess({
-                  session: currentSession,
-                  displayName: name,
-                  birthday: bday,
-                  avatarFile: file
-                });
+              setIsProcessingSignUp(true);
+              try {
+                const { data: { session: currentSession } } = await supabase.auth.getSession();
+                if (currentSession) {
+                  await handleAuthSuccess({
+                    session: currentSession,
+                    displayName: name,
+                    birthday: bday,
+                    avatarFile: file,
+                    isSignUp: true
+                  });
+                }
+              } finally {
+                setIsProcessingSignUp(false);
+                setView('signIn');
               }
-              setView('signIn'); // 同期が終わったらログイン画面へ（またはトップへ）
-            }} 
+            }}
           />
           <div className="mt-4 text-center">
             <button onClick={() => setView('signIn')} className="text-sm text-gray-600 hover:text-gray-800">

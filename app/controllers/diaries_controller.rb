@@ -21,7 +21,7 @@ class DiariesController < ApplicationController
     @diary = Diary.new(diary_params)
     @diary.user_id = current_user.id
     if @diary.save
-      redirect_to root_path, notice: '日記を投稿しました。'
+      redirect_to diaries_path, notice: '日記を投稿しました。', status: :see_other
     else
       @children = Child.where(family_id: current_user.family_id)
       @emojis = Emoji.all
@@ -38,7 +38,7 @@ class DiariesController < ApplicationController
 
   def update
     if @diary.update(diary_params)
-      redirect_to diaries_path, notice: '日記を更新しました。'
+      redirect_to diary_path(@diary.id), notice: '日記を更新しました。', status: :see_other
     else
       @children = Child.where(family_id: current_user.family_id)
       @emojis = Emoji.all

@@ -23,7 +23,7 @@ class MypagesController < ApplicationController
       # Supabase側のデータを更新
       sync_to_supabase(@user)
       
-      redirect_to mypage_path, notice: "プロフィールを更新しました。"
+      redirect_to mypage_path, notice: "プロフィールを更新しました。", status: :see_other
     else
       render :edit, status: :unprocessable_entity
     end

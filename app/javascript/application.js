@@ -3,17 +3,18 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import App from "./react/pages/App";
 
-// 💡 認証ページをレンダリングする関数を定義
+let root = null;
+
 function initializeReactApp() {
   const container = document.getElementById("root");
   
   if (container) {
-    createRoot(container).render(<App />);
+    // すでにrootが存在する場合は、新しく作らずにrenderだけ行う
+    if (!root) {
+      root = createRoot(container);
+    }
+    root.render(<App />);
   }
 }
 
-// 1. ページがフルロードされたとき
-document.addEventListener('DOMContentLoaded', initializeReactApp);
-
-// 2. 💡 Turboによるページ遷移が完了したとき
 document.addEventListener('turbo:load', initializeReactApp);

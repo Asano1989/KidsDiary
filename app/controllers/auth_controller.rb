@@ -33,15 +33,13 @@ class AuthController < ApplicationController
     # 1. JWTトークンをクッキーにセットする処理 (現状の実装)
     cookies[:rails_access_token] = {
       value: auth_params[:jwt_token],
-      # secure: Rails.env.production?, # 環境に応じて設定
-      # httponly: true,                # XSS対策として推奨
-      expires: 1.hour.from_now,        # 適切な期限を設定
-      domain: :all                     # 環境に合わせて調整
+      expires: 1.hour.from_now,
+      path: '/',
+      # secure: Rails.env.production?, # 環境設定に応じて
+      same_site: :lax
     }
 
-    # 2. 成功後、必ずクライアントにリダイレクトを指示
-    # ブラウザは新しいクッキーを付けて '/' にアクセスする
-    redirect_to root_path, status: :see_other
+    render json: { status: 'success', message: 'ログインしました。', redirect_url: root_path }, status: :ok
   end
 
   private
