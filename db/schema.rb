@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_12_23_011449) do
+ActiveRecord::Schema[7.1].define(version: 2025_12_24_071536) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -62,6 +62,15 @@ ActiveRecord::Schema[7.1].define(version: 2025_12_23_011449) do
     t.index ["user_id"], name: "index_diaries_on_user_id"
   end
 
+  create_table "diary_children", force: :cascade do |t|
+    t.bigint "diary_id", null: false
+    t.bigint "child_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["child_id"], name: "index_diary_children_on_child_id"
+    t.index ["diary_id"], name: "index_diary_children_on_diary_id"
+  end
+
   create_table "emojis", force: :cascade do |t|
     t.string "character"
     t.datetime "created_at", null: false
@@ -94,6 +103,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_12_23_011449) do
   add_foreign_key "children", "families"
   add_foreign_key "diaries", "emojis"
   add_foreign_key "diaries", "users"
+  add_foreign_key "diary_children", "children"
+  add_foreign_key "diary_children", "diaries"
   add_foreign_key "families", "users", column: "owner_id"
   add_foreign_key "users", "families"
 end
