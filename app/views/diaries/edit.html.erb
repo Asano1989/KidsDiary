@@ -13,10 +13,13 @@
     </div>
     <div class="my-4">
       <div>
-        <%= f.label :child_id, "どの子？", class: "font-bold" %>
+        <%= f.label :child_ids, "どの子？", class: "font-bold" %>
       </div>
       <div>
-        <!-- %= f.select :child_id, options_from_collection_for_select(@children, :id, :name, { :selected => @child.id }), include_blank: "選択してください", class: "border border-default-medium rounded-base" % -->
+        <%= f.select :child_ids, Diary.child_combination_options(current_user.family),
+              include_blank: "選択してください",
+              name: "diary[child_ids][]",
+              class: "border border-default-medium rounded-base" %>
       </div>
     </div>
     <div class="my-4">
