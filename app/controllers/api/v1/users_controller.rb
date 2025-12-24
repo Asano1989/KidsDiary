@@ -12,14 +12,18 @@ module Api
         # supabase_uid で既存ユーザーを探す、なければ新しく作る
         @user = User.find_or_initialize_by(supabase_uid: user_params[:supabase_uid])
         
-        # データを上書きする
+        is_new_record = @user.new_record?
+  
         @user.email = user_params[:email] if user_params[:email].present?
         @user.name = user_params[:name] if user_params[:name].present?
         @user.birthday = user_params[:birthday] if user_params[:birthday].present?
         @user.avatar.attach(user_params[:avatar]) if user_params[:avatar].present?
 
         if @user.save
-          render json: { status: 'success', user: @user }, status: :ok # 200 OK
+          # 新規か既存かでメッセージを切り替える
+          msg = is_new_record ? 'ユーザー登録が完了しました。' : 'ログインしました。'
+          
+          render json: { status: 'success', message: msg, user: @user }, status: :ok
         else
           render json: { errors: @user.errors.full_messages }, status: :unprocessable_entity
         end
