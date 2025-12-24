@@ -15,7 +15,11 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :diaries
+  resources :diaries do
+    collection do
+      get 'date_index'
+    end
+  end
     
   # APIエンドポイントの定義
   namespace :api do

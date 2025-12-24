@@ -51,6 +51,12 @@ class DiariesController < ApplicationController
     redirect_to diaries_path, notice: '日記を削除しました。', status: :see_other
   end
 
+  def date_index
+    @date = params[:date]
+    # 指定された日付に一致する日記を取得
+    @diaries =current_user.family.diaries.where(date: @date).order(created_at: :asc)
+  end
+
   private
 
   def diary_params
