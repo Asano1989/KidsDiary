@@ -15,7 +15,7 @@ module Families
     def create
       @child = @family.children.build(child_params)
       if @child.save
-        redirect_to @family, notice: "子どもの情報を登録しました"
+        redirect_to @family, notice: "子どもの情報を登録しました", status: :see_other
       else
         render :new, status: :unprocessable_entity
       end
@@ -26,7 +26,7 @@ module Families
 
     def update
       if @child.update(child_params)
-        redirect_to family_path(@family), notice: "子どもの情報を更新しました"
+        redirect_to family_path(@family), notice: "子どもの情報を更新しました", status: :see_other
       else
         render :edit, status: :unprocessable_entity
       end
@@ -34,7 +34,7 @@ module Families
 
     def destroy
       @child.destroy
-      redirect_to family_path(@family), notice: "子どもの情報を削除しました"
+      redirect_to family_path(@family), notice: "子どもの情報を削除しました", status: :see_other
     end
 
     private

@@ -18,7 +18,7 @@ module Families
       family = service.execute
 
       if family
-        redirect_to family_path(family), notice: '家族を作成しました。'
+        redirect_to family_path(family), notice: '家族を作成しました。', status: :see_other
       else
         flash.now[:alert] = '家族の作成に失敗しました。'
         render :new, status: :unprocessable_entity
@@ -38,7 +38,7 @@ module Families
 
     def update
       if @family.update(family_params)
-        redirect_to family_path(@family), notice: '家族名を更新しました。'
+        redirect_to family_path(@family), notice: '家族名を更新しました。', status: :see_other
       else
         # バリデーションエラー時は編集画面を再表示
         render :edit, status: :unprocessable_entity
