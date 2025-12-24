@@ -4,7 +4,7 @@
   <div id="diary_calendar" class="mx-4 my-8">
     <div class="text-center">
       <%= month_calendar(attribute: :date, events: @diaries) do |date, diary| %>
-        <%= date.day %>
+        <%= link_to date.day, date_index_diaries_path(date: date) %>
 
         <% diary.each do |d| %>
           <div>
