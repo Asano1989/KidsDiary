@@ -21,6 +21,10 @@
           <td class="border-collapse border p-2"><%= @diary.user.name %></td>
         </tr>
         <tr>
+          <th class="border-collapse border p-2">children</th>
+          <td class="border-collapse border p-2"><%= @diary.children.map(&:name).join("＆") %></td>
+        </tr>
+        <tr>
           <th class="border-collapse border p-2">emoji's id</th>
           <td class="border-collapse border p-2"><%= @diary.emoji.id %></td>
         </tr>
