@@ -2,37 +2,7 @@
   <h1 class="text-3xl font-bold m-6"><%= l(@date.to_date, format: :long) %>の日記</h1>
 
   <% if @diaries.any? %>
-    <div id="diary" class="w-2/3 justify-self-center">
-      <% @diaries.each do |diary| %>
-        <div class="flex flex-col m-4 border rounded-md">
-          <%# 1段目：絵文字（左寄せ） %>
-          <div class="flex justify-start p-4">
-            <%= link_to diary.emoji.character, diary_path(diary.id), data: { turbo: false } %>
-          </div>
-
-          <%# 2段目：カテゴリ、タグ %>
-          <div class="flex justify-start gap-2 px-6">
-            <% diary.children.map(&:name).each do |child| %>
-              <div class="border p-2"><%= child %></div>
-            <% end %>
-            <div class="border p-2">タグ</div>
-          </div>
-
-          <%# 3段目：ID、家族ID、家族名、ユーザー名 %>
-          <div class="flex justify-center m-2">
-            <div class="p-2">id：<%= diary.id %></div>
-            <div class="p-2">family_id：<%= diary.user.family_id %></div>
-            <div class="p-2">family name：<%= diary.user.family.name %></div>
-            <div class="p-2">user：<%= diary.user.name %></div>
-          </div>
-
-          <%# 4段目：本文 %>
-          <div class="flex justify-start m-2 px-4 py-2">
-            <%= diary.body %>
-          </div>
-        </div>
-      <% end %>
-    </div>
+    <%= render @diaries %>
   <% else %>
     <div>
       <p>日記はありません。</p>
@@ -40,6 +10,6 @@
   <% end %>
 
   <div class="my-8">
-    <%= link_to "カレンダーに戻る", diaries_path %>
+    <%= link_to "カレンダーに戻る", diaries_path, data: { turbo: false } %>
   </div>
 </div>
