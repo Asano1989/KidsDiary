@@ -22,7 +22,11 @@
         </tr>
         <tr>
           <th class="border-collapse border p-2">children</th>
-          <td class="border-collapse border p-2"><%= @diary.children.map(&:name).join("＆") %></td>
+          <td class="border-collapse border p-2">
+            <% @diary.children.map(&:name).each do |child| %>
+              <%= child %><br/>
+            <% end %>
+          </td>
         </tr>
         <tr>
           <th class="border-collapse border p-2">emoji's id</th>
