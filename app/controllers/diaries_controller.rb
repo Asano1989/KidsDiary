@@ -59,6 +59,23 @@ class DiariesController < ApplicationController
     @diaries =current_user.family.diaries.where(date: @date).order(created_at: :asc)
   end
 
+  def filter_by_child
+    # 1. 家族の日記をベースにする
+    @diaries = current_user.family.diaries.includes(:children, :emoji).order(date: :desc)
+
+    # 2. child_idで絞り込むロジック
+    if params[:child_ids].present?
+      @diaries = @diaries.joins(:diary_children)
+                        .where(diary_children: { child_id: params[:child_ids] })
+                        .distinct
+      
+      # 3. ビュー表示用に「現在選択されている子供たち」を取得
+      @selected_children = current_user.family.children.where(id: params[:child_ids])
+    else
+      @diaries = []
+    end
+  end
+
   private
 
   def diary_params
