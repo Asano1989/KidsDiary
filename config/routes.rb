@@ -18,6 +18,7 @@ Rails.application.routes.draw do
   resources :diaries do
     collection do
       get 'date_index'
+      get 'filter_by_child'
     end
   end
     
