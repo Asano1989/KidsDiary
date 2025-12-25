@@ -1,13 +1,19 @@
 <div id="filter_by_child" class="text-center">
-  <h1 class="text-3xl font-bold m-6">日記を絞り込む：
-    <% if @selected_children.present? %>
-      <% @selected_children.each do |child| %>
+  <h1 class="text-3xl font-bold mt-6">日記を絞り込む</h1>
+
+  <% if @selected_children.present? %>
+    <div class="flex justify-center gap-2">
+    <% @selected_children.each do |child| %>
+      <div class="border p-2 my-6">
         <%= child.name %>
-      <% end %>
-    <% else %>
-      対象なし
+      </div>
     <% end %>
-  </h1>
+    </div>
+  <% else %>
+    <div class="flex justify-center p-2 my-6">
+      対象なし
+    </div>
+  <% end %>
 
   <% if @selected_children.present? %>
     <div class="search-status">

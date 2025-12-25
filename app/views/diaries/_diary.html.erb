@@ -8,7 +8,20 @@
     <%# 2段目：カテゴリ、タグ %>
     <div class="flex justify-start gap-2 px-6">
       <% diary.children.each do |child| %>
-        <div class="border p-2"><%= link_to child.name, filter_by_child_diaries_path("child_ids[]" => child.id), data: { turbo: false }, class: "child-link" %></div>
+        <%
+          current_ids = Array.wrap(params[:child_ids]).map(&:to_s)
+          
+          if current_ids.include?(child.id.to_s)
+            # すでに選択済みなら、そのIDを取り除く（解除リンクになる）
+            next_ids = current_ids - [child.id.to_s]
+          else
+            # 未選択なら、IDを追加する
+            next_ids = current_ids + [child.id.to_s]
+          end
+        %>
+        <div class="border p-2">
+          <%= link_to child.name, filter_by_child_diaries_path(child_ids: next_ids), data: { turbo: false } %>
+        </div>
       <% end %>
       <div class="border p-2">タグ</div>
     </div>
