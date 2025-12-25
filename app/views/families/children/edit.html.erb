@@ -17,12 +17,12 @@
       </div>
 
       <div>
-        <%= f.submit "更新する", class: "box-border border border-default-medium shadow-xs font-medium rounded-full text-sm px-4 py-2 m-2" %>
+        <%= f.submit "更新する", data: { turbo: false }, class: "box-border border border-default-medium shadow-xs font-medium rounded-full text-sm px-4 py-2 m-2" %>
       </div>
     <% end %>
   </div>
 
   <div>
-    <%= link_to "キャンセル", family_path(@family) %>
+    <%= link_to "キャンセル", family_path(@family), data: { turbo: false } %>
   </div>
 </div>

@@ -7,7 +7,7 @@
     </div>
     <% if current_user.id == @family.owner_id %>
       <div class="my-2">
-        <%= button_to '家族（グループ）名を編集する', edit_family_path, method: :get, class: "box-border border border-default-medium shadow-xs font-medium rounded-full text-sm px-4 py-2 m-2" %>
+        <%= button_to '家族（グループ）名を編集する', edit_family_path, method: :get, data: { turbo: false }, class: "box-border border border-default-medium shadow-xs font-medium rounded-full text-sm px-4 py-2 m-2" %>
       </div>
     <% end %>
 
@@ -27,16 +27,16 @@
     </div>
     <% if @members.count > 1 && current_user.id == @family.owner_id %>
       <div>
-        <%= button_to "メンバーを削除", family_members_path(family_id: @family.id), method: :get, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2 m-2" %>
-        <%= button_to "メンバーを追加", new_family_member_path(family_id: @family.id), method: :get, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2 m-2" %>
+        <%= button_to "メンバーを削除", family_members_path(family_id: @family.id), method: :get, data: { turbo: false }, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2 m-2" %>
+        <%= button_to "メンバーを追加", new_family_member_path(family_id: @family.id), method: :get, data: { turbo: false }, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2 m-2" %>
       </div>
     <% elsif @members.count <= 1 && current_user.id == @family.owner_id %>
       <div>
-        <%= button_to "メンバーを追加", new_family_member_path(family_id: @family.id), method: :get, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2 m-2" %>
+        <%= button_to "メンバーを追加", new_family_member_path(family_id: @family.id), method: :get, data: { turbo: false }, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2 m-2" %>
       </div>
     <% else %>
       <div>
-        <%= button_to "家族から脱退", family_members_path(family_id: @family.id), method: :get, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2 m-2" %>
+        <%= button_to "家族から脱退", family_members_path(family_id: @family.id), method: :get, data: { turbo: false }, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2 m-2" %>
       </div>
     <% end %>
 
@@ -54,17 +54,17 @@
     </div>
     <% if @family.children.count > 0 && current_user.id == @family.owner_id %>
       <div class="my-2">
-        <%= button_to "子どもの情報を編集・削除", family_children_path(family_id: @family.id), method: :get, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2 m-2" %>
+        <%= button_to "子どもの情報を編集・削除", family_children_path(family_id: @family.id), method: :get, data: { turbo: false }, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2 m-2" %>
         <%= button_to "子どもの情報を追加", new_family_child_path(family_id: @family.id), method: :get, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2 m-2" %>
       </div>
     <% elsif current_user.id == @family.owner_id %>
       <div class="my-2">
-        <%= button_to "子どもの情報を追加", new_family_child_path(family_id: @family.id), method: :get, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2 m-2" %>
+        <%= button_to "子どもの情報を追加", new_family_child_path(family_id: @family.id), method: :get, data: { turbo: false }, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2 m-2" %>
       </div>
     <% end %>
 
     <div class="mt-8">
-      <%= link_to 'マイページへ', mypage_path %>
+      <%= link_to 'マイページへ', mypage_path, data: { turbo: false } %>
     </div>
 
   </div>

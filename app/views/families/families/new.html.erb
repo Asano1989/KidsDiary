@@ -30,7 +30,7 @@
         <%= f.text_field :name, class: "border border-default-medium rounded-base" %>
       </div>
       <div>
-        <%= f.submit "家族（グループ）を作成", class: "box-border border border-default-medium shadow-xs font-medium rounded-full text-sm px-4 py-2 m-2" %>
+        <%= f.submit "家族（グループ）を作成", data: { turbo: false }, class: "box-border border border-default-medium shadow-xs font-medium rounded-full text-sm px-4 py-2 m-2" %>
       </div>
     <% end %>
   </div>
