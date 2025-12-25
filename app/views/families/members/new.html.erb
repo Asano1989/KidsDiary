@@ -1,7 +1,7 @@
 <div id="new_member" class="text-center">
   <h1 class="text-3xl font-bold m-6">家族（グループ）にメンバー追加</h1>
   <div class="my-10">
-    <%= form_with url: family_members_path(@family), method: :post do |f| %>
+    <%= form_with url: family_members_path(@family), method: :post, data: { turbo: false } do |f| %>
       <div>
         <%= f.label :email, "追加するユーザーのメールアドレス" %>
       </div>

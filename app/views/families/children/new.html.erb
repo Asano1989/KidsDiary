@@ -1,7 +1,7 @@
 <div id="new_child" class="text-center">
   <h1 class="text-3xl font-bold m-6">子供の新規登録</h1>
   <div class="my-10">
-    <%= form_with(model: [@family, @child]) do |f| %>
+    <%= form_with(model: [@family, @child], data: { turbo: false }) do |f| %>
       <div>
         <%= f.label :name, "名前" %>
       </div>
