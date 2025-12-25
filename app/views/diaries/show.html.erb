@@ -23,8 +23,8 @@
         <tr>
           <th class="border-collapse border p-2">children</th>
           <td class="border-collapse border p-2">
-            <% @diary.children.map(&:name).each do |child| %>
-              <%= child %><br/>
+            <% @diary.children.each do |child| %>
+              <%= link_to child.name, filter_by_child_diaries_path("child_ids[]" => child.id), data: { turbo: false }, class: "child-link" %><br/>
             <% end %>
           </td>
         </tr>
