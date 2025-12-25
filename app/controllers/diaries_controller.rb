@@ -18,10 +18,8 @@ class DiariesController < ApplicationController
   end
 
   def create
-    if params[:diary][:child_ids].is_a?(String)
-      params[:diary][:child_ids] = params[:diary][:child_ids].split(',')
-    end
     @diary = Diary.new(diary_params)
+    process_child_ids
     @diary.user_id = current_user.id
     if @diary.save
       redirect_to diaries_path, notice: '日記を投稿しました。', status: :see_other
@@ -40,9 +38,7 @@ class DiariesController < ApplicationController
   end
 
   def update
-    if params[:diary][:child_ids].is_a?(String)
-      params[:diary][:child_ids] = params[:diary][:child_ids].split(',')
-    end
+    process_child_ids
     if @diary.update(diary_params)
       redirect_to diary_path(@diary.id), notice: '日記を更新しました。', status: :see_other
     else
@@ -67,6 +63,14 @@ class DiariesController < ApplicationController
 
   def diary_params
     params.require(:diary).permit(:date, :emoji_id, :body, child_ids: [])
+  end
+
+  def process_child_ids
+    # 文字列を数値の配列に変換してセットする
+    if params[:diary][:child_ids].is_a?(String)
+      params[:diary][:child_ids] = params[:diary][:child_ids].split(',')
+      @diary.child_ids = params[:diary][:child_ids]
+    end
   end
 
   def set_diary
