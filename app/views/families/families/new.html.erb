@@ -8,7 +8,7 @@
   </div>
 
   <div id="family_code_form" class="my-10">
-    <%= form_with url: root_path, local: true do |f| %>
+    <%= form_with url: root_path, data: { turbo: false }, local: true do |f| %>
       <div>
         <%= f.label :code, '家族コードを入力' %>
       </div>
@@ -22,7 +22,7 @@
   </div>
 
   <div id="create_family_form" class="my-10">
-    <%= form_with(model: @family, url: families_path, local: true) do |f| %>
+    <%= form_with(model: @family, url: families_path, data: { turbo: false }, local: true) do |f| %>
       <div>
         <%= f.label :name, "家族（グループ）名" %>
       </div>
@@ -30,7 +30,7 @@
         <%= f.text_field :name, class: "border border-default-medium rounded-base" %>
       </div>
       <div>
-        <%= f.submit "家族（グループ）を作成", class: "box-border border border-default-medium shadow-xs font-medium rounded-full text-sm px-4 py-2 m-2" %>
+        <%= f.submit "家族（グループ）を作成", data: { turbo: false }, class: "box-border border border-default-medium shadow-xs font-medium rounded-full text-sm px-4 py-2 m-2" %>
       </div>
     <% end %>
   </div>

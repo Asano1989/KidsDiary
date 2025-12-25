@@ -1,14 +1,14 @@
 <div class="grid grid-cols-4 gap-4 items-center p-6 bg-amber-100">
   <div id="new_article" class="text-center">
-    <%= link_to '日記を投稿', new_diary_path %>
+    <%= link_to '日記を投稿', new_diary_path, data: { turbo: false } %>
   </div>
   <div id="go_to_home" class="text-center">
-    <%= link_to 'ホーム', diaries_path %>
+    <%= link_to 'ホーム', diaries_path, data: { turbo: false } %>
   </div>
   <div id="search" class="text-center">
-    <%= link_to '検索', root_path %>
+    <%= link_to '検索', root_path, data: { turbo: false } %>
   </div>
   <div id="my_page" class="text-center">
-    <%= link_to 'マイページ', mypage_path %>
+    <%= link_to 'マイページ', mypage_path, data: { turbo: false } %>
   </div>
 </div>

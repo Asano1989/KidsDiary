@@ -1,14 +1,14 @@
 <div id="edit_family" class="text-center">
   <h1 class="text-3xl font-bold m-6">家族（グループ）の編集</h1>
   <div id="family_form">
-    <%= form_with model: @family, url: family_path(id: @family.id), local: true do |f| %>
+    <%= form_with model: @family, url: family_path(id: @family.id), data: { turbo: false }, local: true do |f| %>
       <div>
         <div>
           <%= f.label :name, "家族（グループ）名", class: "font-bold" %>
         </div>
         <div>
           <%= f.text_field :name, class: "border border-default-medium rounded-base" %>
-          <%= f.submit "更新", class: "box-border border border-default m-2 pl-2 pr-2" %>
+          <%= f.submit "更新", data: { turbo: false }, class: "box-border border border-default m-2 pl-2 pr-2" %>
         </div>
       </div>
     <% end %>
@@ -43,17 +43,17 @@
     </div>
     <% if @family.children.count > 0 && current_user.id == @family.owner_id %>
       <div>
-        <%= button_to "子どもの情報を編集・削除", family_children_path(family_id: @family.id), method: :get, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2 m-2" %>
+        <%= button_to "子どもの情報を編集・削除", family_children_path(family_id: @family.id), method: :get, data: { turbo: false }, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2 m-2" %>
         <%= button_to "子どもの情報を追加", new_family_child_path(family_id: @family.id), method: :get, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2 m-2" %>
       </div>
     <% elsif current_user.id == @family.owner_id %>
       <div>
-        <%= button_to "子どもの情報を追加", new_family_child_path(family_id: @family.id), method: :get, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2 m-2" %>
+        <%= button_to "子どもの情報を追加", new_family_child_path(family_id: @family.id), method: :get, data: { turbo: false }, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2 m-2" %>
       </div>
     <% end %>
   </div>
 
   <div class="mt-8">
-    <%= link_to "戻る", family_path(@family) %>
+    <%= link_to "戻る", family_path(@family), data: { turbo: false } %>
   </div>
 </div>

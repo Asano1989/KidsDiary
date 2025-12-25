@@ -129,7 +129,7 @@ const useAuthLogic = () => {
       console.error('Auth Success 処理中にエラー:', error);
       return false;
     }
-  }, []);
+  }, [setFlashMessage, setUserProfile, setRailsSynced]);
 
 
   useEffect(() => {
@@ -220,7 +220,8 @@ const AuthPage: React.FC = () => {
     loading,
     handleSignOut,
     handleAuthSuccess,
-    flashMessage
+    flashMessage,
+    setIsProcessingSignUp
   } = useAuthLogic();
   const [view, setView] = useState<'signIn' | 'signUp' | 'forgotPassword' | 'updatePassword'>('signIn');
 

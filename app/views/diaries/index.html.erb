@@ -8,7 +8,7 @@
 
         <% diary.each do |d| %>
           <div>
-            <%= link_to d.emoji.character, diary_path(d.id) %>
+            <%= link_to d.emoji.character, diary_path(d.id), data: { turbo: false } %>
           </div>
         <% end %>
       <% end %>
