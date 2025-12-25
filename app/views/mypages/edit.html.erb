@@ -2,7 +2,7 @@
   <h1 class="text-3xl font-bold m-6">プロフィール編集</h1>
 
   <div id="user_form">
-    <%= form_with model: @user, url: mypage_path, method: :patch, local: true do |f| %>
+    <%= form_with model: @user, url: mypage_path, method: :patch, data: { turbo: false }, local: true do |f| %>
     <div class="my-4">
       <div class="justify-self-center">
         <%= image_tag @user.display_avatar, class: "w-24 h-24 rounded-full object-cover" %>
@@ -31,12 +31,12 @@
       </div>
     </div>
     <div class="my-4">
-      <%= f.submit "更新する", class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2.5" %>
+      <%= f.submit "更新する", data: { turbo: false }, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2.5" %>
     </div>
     <% end %>
   </div>
 
   <div class="mt-8">
-    <%= link_to "戻る", mypage_path %>
+    <%= link_to "戻る", mypage_path, data: { turbo: false } %>
   </div>
 </div>
