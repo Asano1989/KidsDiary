@@ -7,7 +7,7 @@
         <div class="flex flex-col m-4 border rounded-md">
           <%# 1段目：絵文字（左寄せ） %>
           <div class="flex justify-start p-4">
-            <%= diary.emoji.character %>
+            <%= link_to diary.emoji.character, diary_path(diary.id), data: { turbo: false } %>
           </div>
 
           <%# 2段目：カテゴリ、タグ %>
