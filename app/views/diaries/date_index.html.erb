@@ -12,7 +12,9 @@
 
           <%# 2段目：カテゴリ、タグ %>
           <div class="flex justify-start gap-2 px-6">
-            <div class="border p-2">カテゴリ</div>
+            <% diary.children.map(&:name).each do |child| %>
+              <div class="border p-2"><%= child %></div>
+            <% end %>
             <div class="border p-2">タグ</div>
           </div>
 
