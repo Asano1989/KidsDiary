@@ -6,7 +6,7 @@ class Diary < ApplicationRecord
   has_many :children, through: :diary_children
   has_many :reactions, dependent: :destroy
   
-  validates :date, :body, presence: true
+  validates :date, :body, :children, presence: true
 
   def self.child_combination_options(family)
     return [] unless family

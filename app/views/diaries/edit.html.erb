@@ -8,7 +8,7 @@
         <%= f.label :date, "日付", class: "font-bold" %>
       </div>
       <div>
-        <%= f.date_field :date, class: "border border-default-medium rounded-base" %>
+        <%= f.date_field :date, class: "border border-default-medium" %>
       </div>
     </div>
     <div class="my-4">
@@ -19,14 +19,17 @@
         <%= f.select :child_ids, Diary.child_combination_options(current_user.family),
               include_blank: "選択してください",
               name: "diary[child_ids][]",
-              class: "border border-default-medium rounded-base" %>
+              class: "border border-default-medium" %>
       </div>
     </div>
     <div class="my-4">
         <%= f.label :emoji_id, "絵文字", class: "font-bold" %>
       </div>
       <div>
-        <%= f.select :emoji_id, options_from_collection_for_select(@emojis, :id, :character, { :selected => @emoji.id }), include_blank: "選択してください", class: "border border-default-medium rounded-base" %>
+        <%= f.select :emoji_id,
+            options_from_collection_for_select(@emojis, :id, :character, f.object.emoji_id), 
+            { include_blank: "選択してください" },
+            { class: "border border-default-medium" } %>
       </div>
     </div>
     <div class="my-4">
@@ -34,7 +37,7 @@
         <%= f.label :body, "本文", class: "font-bold" %>
       </div>
       <div>
-        <%= f.text_area :body, class: "border border-default-medium rounded-base" %>
+        <%= f.text_area :body, class: "border border-default-medium" %>
       </div>
     </div>
     <div class="my-4">
