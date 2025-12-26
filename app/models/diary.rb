@@ -4,6 +4,7 @@ class Diary < ApplicationRecord
 
   has_many :diary_children, dependent: :destroy
   has_many :children, through: :diary_children
+  has_many :reactions, dependent: :destroy
   
   validates :date, :body, presence: true
 
