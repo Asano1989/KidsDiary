@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_12_24_071536) do
+ActiveRecord::Schema[7.1].define(version: 2025_12_26_004429) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -86,6 +86,18 @@ ActiveRecord::Schema[7.1].define(version: 2025_12_24_071536) do
     t.index ["owner_id"], name: "index_families_on_owner_id", unique: true
   end
 
+  create_table "reactions", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "diary_id", null: false
+    t.bigint "emoji_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["diary_id"], name: "index_reactions_on_diary_id"
+    t.index ["emoji_id"], name: "index_reactions_on_emoji_id"
+    t.index ["user_id", "diary_id", "emoji_id"], name: "index_reactions_on_user_id_and_diary_id_and_emoji_id", unique: true
+    t.index ["user_id"], name: "index_reactions_on_user_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email", null: false
     t.string "name"
@@ -106,5 +118,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_12_24_071536) do
   add_foreign_key "diary_children", "children"
   add_foreign_key "diary_children", "diaries"
   add_foreign_key "families", "users", column: "owner_id"
+  add_foreign_key "reactions", "diaries"
+  add_foreign_key "reactions", "emojis"
+  add_foreign_key "reactions", "users"
   add_foreign_key "users", "families"
 end
