@@ -1,0 +1,43 @@
+<div id="filter_by_child" class="text-center">
+  <h1 class="text-3xl font-bold mt-6">日記を絞り込む</h1>
+
+  <% if @selected_children.present? %>
+    <div class="flex justify-center gap-2">
+    <% @selected_children.each do |child| %>
+      <div class="border p-2 my-6">
+        <%
+          current_ids = Array.wrap(params[:child_ids]).map(&:to_s)
+          
+          if current_ids.include?(child.id.to_s)
+            # すでに選択済みなら、そのIDを取り除く（解除リンクになる）
+            next_ids = current_ids - [child.id.to_s]
+          else
+            # 未選択なら、IDを追加する
+            next_ids = current_ids + [child.id.to_s]
+          end
+        %>
+        <%= link_to child.name, filter_by_child_diaries_path(child_ids: next_ids), data: { turbo: false } %>
+      </div>
+    <% end %>
+    </div>
+  <% else %>
+    <div class="flex justify-center p-2 my-6">
+      対象なし
+    </div>
+  <% end %>
+
+  <% if @selected_children.present? %>
+    <div class="search-status">
+      <%= button_to "すべての絞り込みを解除", filter_by_child_diaries_path, method: :get, data: { turbo: false }, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2.5" %>
+    </div>
+  <% end %>
+
+  <div class="diary-list">
+    <% if @diaries.any? %>
+      <%= render @diaries %>
+    <% else %>
+      <p>該当する日記はありません。</p>
+    <% end %>
+  </div>
+
+</div>
