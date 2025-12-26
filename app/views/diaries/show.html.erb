@@ -74,6 +74,45 @@
           </td>
         </tr>
         <% end %>
+        <tr>
+          <td colspan="2"  class="border-collapse border p-2">
+            <div class="flex flex-wrap gap-2 mt-4">
+              <%# 1. 既に付いているリアクションをカウントして表示 %>
+              <% @diary.reactions.group(:emoji_id).count.each do |emoji_id, count| %>
+                <% emoji = Emoji.find(emoji_id) %>
+                <button class="flex items-center gap-1 px-2 py-1 bg-gray-100 hover:bg-gray-200 border rounded-full transition">
+                  <span><%= emoji.character %></span>
+                  <span class="text-xs font-bold text-gray-600"><%= count %></span>
+                </button>
+              <% end %>
+
+              <%# 2. 新しくリアクションを追加するためのボタン（＋マークなど） %>
+              <details class="relative inline-block overflow-visible">
+                <summary class="list-none cursor-pointer">
+                  <div class="px-3 py-1 border-2 border-dashed border-gray-300 rounded-full text-gray-400">
+                    ＋
+                  </div>
+                </summary>
+
+                <%# クリックするとこれが表示される %>
+                <div class="absolute bottom-full left-0 mb-2 flex bg-white border shadow-xl rounded-lg p-2 gap-2 z-50 min-w-max">
+                  <% Emoji.order("RANDOM()").limit(6).each do |emoji| %>
+                    <%= button_to diary_reactions_path(@diary, emoji_id: emoji.id),
+                                  method: :post,
+                                  class: "text-xl hover:scale-125 transition" do %>
+                      <%= emoji.character %>
+                    <% end %>
+                  <% end %>
+                </div>
+              </details>
+
+              <style>
+                /* 三角矢印を消すためのスタイル */
+                summary::-webkit-details-marker { display: none; }
+              </style>
+            </div>
+          </td>
+        </tr>
       </tbody>
     </table>
   </div>
