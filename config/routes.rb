@@ -16,6 +16,7 @@ Rails.application.routes.draw do
   end
 
   resources :diaries do
+    resources :reactions, only: [:create, :destroy]
     collection do
       get 'date_index'
       get 'filter'
