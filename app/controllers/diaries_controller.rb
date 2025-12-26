@@ -60,26 +60,32 @@ class DiariesController < ApplicationController
   end
 
   def filter
-    # 1. 家族の日記をベースにする
+    # 1. ベースのクエリ（N+1対策含む）
     @diaries = current_user.family.diaries.includes(:children, :emoji).order(date: :desc)
 
-    # params[:child_ids] が文字列単体で来ても配列で来ても扱えるように念のため cast
-    child_ids = Array.wrap(params[:child_ids])
+    # パラメータの整理
+    @target_child_ids = Array.wrap(params[:child_ids]).reject(&:blank?)
+    @target_emoji_id = params[:emoji_id].presence
 
-    # 2. child_idで絞り込むロジック
-    if child_ids.present?
-      # 1. 選択されたすべての子供IDを持つ日記のIDを特定する
-      target_diary_ids = DiaryChild.where(child_id: child_ids)
+    # 2. 子供での絞り込み (AND検索ロジック)
+    if @target_child_ids.present?
+      target_diary_ids = DiaryChild.where(child_id: @target_child_ids)
                                   .group(:diary_id)
-                                  .having('COUNT(diary_id) = ?', child_ids.size)
+                                  .having('COUNT(diary_id) = ?', @target_child_ids.size)
                                   .pluck(:diary_id)
-
-      # 2. 特定したIDで日記を絞り込む
+      # 絞り込まれたIDで日記をフィルタリング
       @diaries = @diaries.where(id: target_diary_ids)
-      
-      # 3. ビュー表示用に「現在選択されている子供たち」を取得
-      @selected_children = current_user.family.children.where(id: child_ids)
-    else
+      @selected_children = current_user.family.children.where(id: @target_child_ids)
+    end
+
+    # 3. 絵文字での絞り込み (if を独立させて子供の絞り込み結果に対してさらに絞り込む)
+    if @target_emoji_id.present?
+      @diaries = @diaries.where(emoji_id: @target_emoji_id)
+      @selected_emoji = Emoji.find_by(id: @target_emoji_id)
+    end
+
+    # 4. 何も選択されていない時に日記を表示しない
+    if @target_child_ids.blank? && @target_emoji_id.blank?
       @diaries = []
     end
   end
