@@ -1,8 +1,8 @@
-<div id="diary" class="w-2/3 justify-self-center">
+<div id="diary" class="w-2/3 justify-self-center cursor-pointer" onclick='window.location="<%= diary_path(diary.id) %>"' role="link" data-turbolinks="false">
   <div class="flex flex-col m-4 border rounded-md">
     <%# 1段目：絵文字（左寄せ） %>
     <div class="flex justify-start p-4">
-      <%= link_to diary.emoji.character, diary_path(diary.id), data: { turbo: false } %>
+      <%= diary.emoji.character %>
     </div>
 
     <%# 2段目：カテゴリ、タグ %>
@@ -23,19 +23,19 @@
           <%= link_to child.name, filter_by_child_diaries_path(child_ids: next_ids), data: { turbo: false } %>
         </div>
       <% end %>
-      <div class="border p-2">タグ</div>
+      <div class="border p-2 cursor-default">タグ</div>
     </div>
 
     <%# 3段目：ID、家族ID、家族名、ユーザー名 %>
     <div class="flex justify-center m-2">
-      <div class="p-2">id：<%= diary.id %></div>
-      <div class="p-2">family_id：<%= diary.user.family_id %></div>
-      <div class="p-2">family name：<%= diary.user.family.name %></div>
-      <div class="p-2">user：<%= diary.user.name %></div>
+      <div class="p-2 cursor-default">id：<%= diary.id %></div>
+      <div class="p-2 cursor-default">family_id：<%= diary.user.family_id %></div>
+      <div class="p-2 cursor-default">family name：<%= diary.user.family.name %></div>
+      <div class="p-2 cursor-default">user：<%= diary.user.name %></div>
     </div>
 
     <%# 4段目：本文 %>
-    <div class="flex justify-start m-2 px-4 py-2">
+    <div class="flex justify-start m-2 px-4 py-2 cursor-default">
       <%= diary.body %>
     </div>
   </div>
