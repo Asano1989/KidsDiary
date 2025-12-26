@@ -1,14 +1,14 @@
-<div id="diary" class="w-2/3 justify-self-center cursor-pointer" onclick='window.location="<%= diary_path(diary.id) %>"' role="link" data-turbolinks="false">
+<div id="diary" class="w-2/3 justify-self-center relative transition">
   <div class="flex flex-col m-4 border rounded-md">
     <%# 1段目：絵文字（左寄せ） %>
     <div class="flex justify-start p-4 relative z-10">
-<%= link_to filter_diaries_path(child_ids: params[:child_ids], emoji_id: diary.emoji.id), data: { turbo: false } do %>
-      <%= diary.emoji.character %>
-<% end %>
+      <%= link_to filter_diaries_path(child_ids: params[:child_ids], emoji_id: diary.emoji.id), data: { turbo: false } do %>
+        <%= diary.emoji.character %>
+      <% end %>
     </div>
 
     <%# 2段目：カテゴリ、タグ %>
-    <div class="flex justify-start gap-2 px-6">
+    <div class="flex justify-start gap-2 px-6 relative z-10">
       <% diary.children.each do |child| %>
         <%
           current_ids = Array.wrap(params[:child_ids]).map(&:to_s)
@@ -25,20 +25,23 @@
           <%= link_to child.name, filter_diaries_path(child_ids: next_ids, emoji_id: params[:emoji_id]), data: { turbo: false } %>
         </div>
       <% end %>
-      <div class="border p-2 cursor-default">タグ</div>
+      <div class="border p-2 relative z-10">タグ</div>
     </div>
 
     <%# 3段目：ID、家族ID、家族名、ユーザー名 %>
     <div class="flex justify-center m-2">
-      <div class="p-2 cursor-default">id：<%= diary.id %></div>
-      <div class="p-2 cursor-default">family_id：<%= diary.user.family_id %></div>
-      <div class="p-2 cursor-default">family name：<%= diary.user.family.name %></div>
-      <div class="p-2 cursor-default">user：<%= diary.user.name %></div>
+      <div class="p-2">id：<%= diary.id %></div>
+      <div class="p-2">family_id：<%= diary.user.family_id %></div>
+      <div class="p-2">family name：<%= diary.user.family.name %></div>
+      <div class="p-2">user：<%= diary.user.name %></div>
     </div>
 
     <%# 4段目：本文 %>
-    <div class="flex justify-start m-2 px-4 py-2 cursor-default">
+    <div class="flex justify-start m-2 px-4 py-2">
       <%= diary.body %>
     </div>
   </div>
+  <%= link_to "", diary_path(diary),
+      class: "absolute inset-0 z-0",
+      data: { turbo: false } %>
 </div>
