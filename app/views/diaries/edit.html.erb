@@ -26,7 +26,10 @@
         <%= f.label :emoji_id, "絵文字", class: "font-bold" %>
       </div>
       <div>
-        <%= f.select :emoji_id, options_from_collection_for_select(@emojis, :id, :character, { :selected => @emoji.id }), include_blank: "選択してください", class: "border border-default-medium rounded-base" %>
+        <%= f.select :emoji_id,
+            options_from_collection_for_select(@emojis, :id, :character, f.object.emoji_id), 
+            { include_blank: "選択してください" },
+            { class: "border border-default-medium" } %>
       </div>
     </div>
     <div class="my-4">
