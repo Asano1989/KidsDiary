@@ -24,17 +24,34 @@
           <th class="border-collapse border p-2">children</th>
           <td class="border-collapse border p-2">
             <% @diary.children.each do |child| %>
-              <%= link_to child.name, filter_diaries_path("child_ids[]" => child.id), data: { turbo: false }, class: "child-link" %><br/>
+<%
+                current_ids = Array.wrap(params[:child_ids]).map(&:to_s)
+                
+                if current_ids.include?(child.id.to_s)
+                  # すでに選択済みなら、そのIDを取り除く（解除リンクになる）
+                  next_ids = current_ids - [child.id.to_s]
+                else
+                  # 未選択なら、IDを追加する
+                  next_ids = current_ids + [child.id.to_s]
+                end
+              %>
+              <%= link_to child.name, filter_diaries_path(child_ids: next_ids, emoji_id: params[:emoji_id]), data: { turbo: false } %><br/>
             <% end %>
           </td>
         </tr>
         <tr>
           <th class="border-collapse border p-2">emoji's id</th>
-          <td class="border-collapse border p-2"><%= @diary.emoji.id %></td>
+          <td class="border-collapse border p-2">
+<%= @diary.emoji.id %>
+</td>
         </tr>
         <tr>
           <th class="border-collapse border p-2">emoji</th>
-          <td class="border-collapse border p-2"><%= @diary.emoji.character %></td>
+          <td class="border-collapse border p-2">
+            <%= link_to filter_diaries_path(child_ids: params[:child_ids], emoji_id: @diary.emoji.id), data: { turbo: false } do %>
+<%= @diary.emoji.character %>
+            <% end %>
+</td>
         </tr>
         <tr>
           <th class="border-collapse border p-2">body</th>
