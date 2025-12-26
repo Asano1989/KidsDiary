@@ -1,4 +1,4 @@
-<div id="filter_by_child" class="text-center">
+<div id="filter_diaries" class="text-center">
   <h1 class="text-3xl font-bold mt-6">日記を絞り込む</h1>
 
   <% if @selected_children.present? %>
@@ -16,7 +16,7 @@
             next_ids = current_ids + [child.id.to_s]
           end
         %>
-        <%= link_to child.name, filter_by_child_diaries_path(child_ids: next_ids), data: { turbo: false } %>
+        <%= link_to child.name, filter_diaries_path(child_ids: next_ids), data: { turbo: false } %>
       </div>
     <% end %>
     </div>
@@ -28,7 +28,7 @@
 
   <% if @selected_children.present? %>
     <div class="search-status">
-      <%= button_to "すべての絞り込みを解除", filter_by_child_diaries_path, method: :get, data: { turbo: false }, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2.5" %>
+      <%= button_to "すべての絞り込みを解除", filter_diaries_path, method: :get, data: { turbo: false }, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2.5" %>
     </div>
   <% end %>
 

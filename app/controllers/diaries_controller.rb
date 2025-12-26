@@ -59,7 +59,7 @@ class DiariesController < ApplicationController
     @diaries =current_user.family.diaries.where(date: @date).order(created_at: :asc)
   end
 
-  def filter_by_child
+  def filter
     # 1. 家族の日記をベースにする
     @diaries = current_user.family.diaries.includes(:children, :emoji).order(date: :desc)
 
