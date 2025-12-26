@@ -3,6 +3,7 @@ class User < ApplicationRecord
   has_one :owned_family, class_name: 'Family', foreign_key: 'owner_id'
   has_one_attached :avatar
   has_many :diaries, dependent: :destroy
+  has_many :reactions
 
   validates :supabase_uid, presence: true, uniqueness: true
   validates :email, presence: true, uniqueness: true
