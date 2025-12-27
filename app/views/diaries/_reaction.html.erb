@@ -1,0 +1,55 @@
+<div class="flex flex-wrap gap-2 mt-4">
+  <div class="flex flex-wrap gap-2 mt-2">
+    <%# 日記に付いているリアクションを「絵文字ごと」にまとめてループ %>
+    <% diary.reactions.group(:emoji_id).count.each do |emoji_id, count| %>
+      <%
+        emoji = Emoji.find(emoji_id)
+        # 自分がこの日記の、この絵文字にリアクションしているか探す
+        my_reaction = diary.reactions.find_by(emoji_id: emoji_id, user_id: current_user.id)
+      %>
+
+      <% if my_reaction %>
+        <%# 自分のリアクションなら、DELETEメソッドで削除リンクにする %>
+        <%= link_to diary_reaction_path(diary, my_reaction),
+                    data: { "turbo-method": :delete },
+                    class: "flex items-center gap-1 px-2 py-1 bg-blue-100 border border-blue-300 rounded-full transition hover:bg-red-50" do %>
+          <span><%= emoji.character %></span>
+          <span class="text-xs font-bold text-blue-700"><%= count %></span>
+        <% end %>
+      <% else %>
+        <%# 他人のリアクションなら、クリックしても何も起きない（または追加するリンクにする） %>
+        <%= button_to diary_reactions_path(diary, emoji_id: emoji_id),
+                      method: :post,
+                      class: "flex items-center gap-1 px-2 py-1 bg-gray-50 border border-gray-200 rounded-full hover:bg-gray-200" do %>
+          <span><%= emoji.character %></span>
+          <span class="text-xs font-bold text-gray-500"><%= count %></span>
+        <% end %>
+      <% end %>
+    <% end %>
+  </div>
+
+  <%# 2. 新しくリアクションを追加するためのボタン（＋マークなど） %>
+  <details class="relative inline-block overflow-visible">
+    <summary class="list-none cursor-pointer">
+      <div class="px-3 py-1 border-2 border-dashed border-gray-300 rounded-full text-gray-400">
+        ＋
+      </div>
+    </summary>
+
+    <%# クリックするとこれが表示される %>
+    <div class="absolute bottom-full left-0 mb-2 flex bg-white border shadow-xl rounded-lg p-2 gap-2 z-50 min-w-max">
+      <% Emoji.order("RANDOM()").limit(6).each do |emoji| %>
+        <%= button_to diary_reactions_path(diary, emoji_id: emoji.id),
+                      method: :post,
+                      class: "text-xl hover:scale-125 transition" do %>
+          <%= emoji.character %>
+        <% end %>
+      <% end %>
+    </div>
+  </details>
+
+  <style>
+    /* 三角矢印を消すためのスタイル */
+    summary::-webkit-details-marker { display: none; }
+  </style>
+</div>
