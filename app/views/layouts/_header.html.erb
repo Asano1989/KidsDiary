@@ -1,12 +1,12 @@
-<div class="grid grid-cols-3 gap-4 items-center p-8 bg-sky-100">
-  <div class="col-span-2">
-    <%= link_to 'おもいでつむぎ', root_path, class: "text-4xl font-bold" %>
+<div class="grid grid-cols-2 gap-2 items-center p-4 bg-sky-100">
+  <div class="text-left">
+    <%=link_to image_tag('/tsumugi-logo.png', class: "max-h-[4dvh]"), root_path %>
   </div>
-  <div class="text-center">
+  <div class="text-right">
     <% if logged_in? %>
       <%= link_to 'ログアウト', logout_path, data: { turbo_method: :delete, turbo_confirm: "ログアウトしますか？" } %>
     <% else %>
-      <%= link_to 'ログイン / 新規登録', auth_path %>
+      <%= link_to "ログイン・新規登録", auth_path %>
     <% end %>
   </div>
 </div>
