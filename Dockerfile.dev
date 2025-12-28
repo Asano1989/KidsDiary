@@ -11,6 +11,7 @@ RUN yarn cache clean && yarn add react react-dom
 RUN yarn add @supabase/supabase-js
 RUN yarn add @types/react @types/react-dom @types/node
 RUN yarn add -D dotenv
+RUN yarn add -D @iconify/tailwind4
 
 RUN apt-get update
 RUN apt-get install -y vim
