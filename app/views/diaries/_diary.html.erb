@@ -40,6 +40,12 @@
     <div class="flex justify-start m-2 px-4 py-2">
       <%= diary.body %>
     </div>
+
+    <% if diary.user != current_user %>
+    <div class="flex justify-end m-2 px-4 py-2">
+      <%= render 'diaries/reaction', diary: diary %>
+    </div>
+    <% end %>
   </div>
   <%= link_to "", diary_path(diary),
       class: "absolute inset-0 z-0",
