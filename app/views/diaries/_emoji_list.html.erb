@@ -1,0 +1,9 @@
+<%= turbo_frame_tag "emoji_palette_#{diary.id}" do %>
+  <div class="absolute bottom-full left-0 mb-2 flex bg-white border shadow-xl rounded-lg p-2 gap-2 z-50 min-w-max items-center">
+    <% Emoji.order("RANDOM()").limit(6).each do |emoji| %>
+      <%= button_to emoji.character, diary_reactions_path(diary, emoji_id: emoji.id),
+                    method: :post, data: { turbo_frame: "_top" } %>
+    <% end %>
+    <%= link_to "↻", refresh_emoji_diary_path(diary), class: "ml-2 text-gray-400 hover:text-blue-500 text-sm" %>
+  </div>
+<% end %>

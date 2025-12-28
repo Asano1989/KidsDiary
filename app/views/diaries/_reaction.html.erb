@@ -28,25 +28,8 @@
     <% end %>
   </div>
 
-  <%# 2. 新しくリアクションを追加するためのボタン（＋マークなど） %>
-  <details class="relative inline-block overflow-visible">
-    <summary class="list-none cursor-pointer">
-      <div class="px-3 py-1 border-2 border-dashed border-gray-300 rounded-full text-gray-400">
-        ＋
-      </div>
-    </summary>
-
-    <%# クリックするとこれが表示される %>
-    <div class="absolute bottom-full left-0 mb-2 flex bg-white border shadow-xl rounded-lg p-2 gap-2 z-50 min-w-max">
-      <% Emoji.order("RANDOM()").limit(6).each do |emoji| %>
-        <%= button_to diary_reactions_path(diary, emoji_id: emoji.id),
-                      method: :post,
-                      class: "text-xl hover:scale-125 transition" do %>
-          <%= emoji.character %>
-        <% end %>
-      <% end %>
-    </div>
-  </details>
+  <%# 2. リアクションのパレットを表示 %>
+  <%= render 'reaction_palette', diary: diary %>
 
   <style>
     /* 三角矢印を消すためのスタイル */
