@@ -62,10 +62,13 @@
         <%= button_to "子どもの情報を追加", new_family_child_path(family_id: @family.id), method: :get, data: { turbo: false }, class: "box-border border border-default-medium shadow-xs font-medium leading-5 rounded-full text-sm px-4 py-2 m-2" %>
       </div>
     <% end %>
-
-    <div class="mt-8">
-      <%= link_to 'マイページへ', mypage_path, data: { turbo: false } %>
     </div>
 
+  <div class="my-8">
+    <%= link_to 'マイページへ', mypage_path, data: { turbo: false } %>
+  </div>
+
+  <div>
+    <%= render 'layouts/footer' %>
   </div>
 </div>
