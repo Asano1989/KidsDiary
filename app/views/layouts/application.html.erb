@@ -13,13 +13,13 @@
     <%= javascript_include_tag "application", "data-turbo-track": "reload", type: "module" %>
   </head>
 
-  <body class="flex flex-col min-h-screen">
+  <body class="grid grid-rows-[auto_1fr_auto] h-[100dvh] overflow-hidden">
     <div id="header">
       <%= render 'layouts/header' %>
     </div>
-    <div id="main" class="flex-grow flex flex-col">
-      <%= render 'shared/flash_messages' %>
-      <%= yield %>
+    <div id="main" class="overflow-y-auto">
+        <%= render 'shared/flash_messages' %>
+        <%= yield %>
     </div>
     <div id="menu">
       <%= render 'layouts/menu' %>
