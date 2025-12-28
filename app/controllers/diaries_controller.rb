@@ -90,6 +90,12 @@ class DiariesController < ApplicationController
     end
   end
 
+  def refresh_emoji
+    @diary = Diary.find(params[:id])
+    # 独自のレイアウトを使わず、パーシャルだけを返す
+    render partial: 'diaries/emoji_list', locals: { diary: @diary }
+  end
+
   private
 
   def diary_params
