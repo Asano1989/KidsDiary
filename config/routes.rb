@@ -16,6 +16,10 @@ Rails.application.routes.draw do
   end
 
   resources :diaries do
+    resources :reactions, only: [:create, :destroy]
+    member do
+      get :refresh_emoji
+    end
     collection do
       get 'date_index'
       get 'filter'

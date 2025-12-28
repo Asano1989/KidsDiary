@@ -1,0 +1,12 @@
+<% my_reactions_count = diary.reactions.where(user_id: current_user.id).count %>
+<% if diary.user_id != current_user.id &&
+      diary.user.family_id == current_user.family_id &&
+      my_reactions_count < 5 %>
+  <details class="relative inline-block overflow-visible">
+    <summary class="list-none cursor-pointer">
+      <div class="px-3 py-1 border-2 border-dashed border-gray-300 rounded-full text-gray-400">＋</div>
+    </summary>
+
+    <%= render 'emoji_list', diary: diary %>
+  </details>
+<% end %>
