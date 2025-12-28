@@ -1,14 +1,29 @@
-<div class="grid grid-cols-4 gap-3 items-center py-4 px-2 bg-amber-100">
-  <div id="new_article" class="text-center">
-    <%= link_to '日記を投稿', new_diary_path, data: { turbo: false } %>
+<div class="grid grid-cols-4 gap-1 items-center py-2 px-1 bg-amber-100 border-t border-amber-300 shadow-[0_-1px_10px_rgba(0,0,0,0.1)]">
+  <div id="new_article" class="flex flex-col items-center justify-center">
+    <%= link_to new_diary_path, data: { turbo: false }, class: "flex flex-col items-center gap-1 group" do %>
+      <span class="icon-[lucide--plus-circle] text-2xl text-amber-500 transition-transform group-active:scale-95"></span>
+      <span class="text-[10px] font-bold text-neutral-700">日記投稿</span>
+    <% end %>
   </div>
-  <div id="go_to_home" class="text-center">
-    <%= link_to 'ホーム', diaries_path, data: { turbo: false } %>
+
+  <div id="go_to_home" class="flex flex-col items-center justify-center">
+    <%= link_to diaries_path, data: { turbo: false }, class: "flex flex-col items-center gap-1 group" do %>
+      <span class="icon-[lucide--home] text-2xl text-amber-500 transition-transform group-active:scale-95"></span>
+      <span class="text-[10px] font-bold text-neutral-700">ホーム</span>
+    <% end %>
   </div>
-  <div id="search" class="text-center">
-    <%= link_to '検索', root_path, data: { turbo: false } %>
+
+  <div id="search" class="flex flex-col items-center justify-center">
+    <%= link_to root_path, data: { turbo: false }, class: "flex flex-col items-center gap-1 group" do %>
+      <span class="icon-[lucide--search] text-2xl text-amber-500 transition-transform group-active:scale-95"></span>
+      <span class="text-[10px] font-bold text-neutral-700">検索</span>
+    <% end %>
   </div>
-  <div id="my_page" class="text-center">
-    <%= link_to 'マイページ', mypage_path, data: { turbo: false } %>
+
+  <div id="my_page" class="flex flex-col items-center justify-center">
+    <%= link_to mypage_path, data: { turbo: false }, class: "flex flex-col items-center gap-1 group" do %>
+      <span class="icon-[lucide--user] text-2xl text-amber-500 transition-transform group-active:scale-95"></span>
+      <span class="text-[10px] font-bold text-neutral-700">マイページ</span>
+    <% end %>
   </div>
 </div>
