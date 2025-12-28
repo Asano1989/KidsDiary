@@ -43,7 +43,7 @@
 
     <% if diary.user != current_user %>
     <div class="flex justify-end m-2 px-4 py-2">
-      <%= render 'diaries/reaction', diary: diary %>
+      <%= render 'reaction', diary: diary %>
     </div>
     <% end %>
   </div>
