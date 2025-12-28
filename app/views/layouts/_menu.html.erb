@@ -2,28 +2,28 @@
   <div id="new_article" class="flex flex-col items-center justify-center">
     <%= link_to new_diary_path, data: { turbo: false }, class: "flex flex-col items-center gap-1 group" do %>
       <span class="icon-[lucide--plus-circle] text-2xl text-amber-500 transition-transform group-active:scale-95"></span>
-      <span class="text-[10px] font-bold text-neutral-700">日記投稿</span>
+      <span class="text-[10px] font-bold text-amber-800">日記投稿</span>
     <% end %>
   </div>
 
   <div id="go_to_home" class="flex flex-col items-center justify-center">
     <%= link_to diaries_path, data: { turbo: false }, class: "flex flex-col items-center gap-1 group" do %>
       <span class="icon-[lucide--home] text-2xl text-amber-500 transition-transform group-active:scale-95"></span>
-      <span class="text-[10px] font-bold text-neutral-700">ホーム</span>
+      <span class="text-[10px] font-bold text-amber-800">ホーム</span>
     <% end %>
   </div>
 
   <div id="search" class="flex flex-col items-center justify-center">
     <%= link_to root_path, data: { turbo: false }, class: "flex flex-col items-center gap-1 group" do %>
       <span class="icon-[lucide--search] text-2xl text-amber-500 transition-transform group-active:scale-95"></span>
-      <span class="text-[10px] font-bold text-neutral-700">検索</span>
+      <span class="text-[10px] font-bold text-amber-800">検索</span>
     <% end %>
   </div>
 
   <div id="my_page" class="flex flex-col items-center justify-center">
     <%= link_to mypage_path, data: { turbo: false }, class: "flex flex-col items-center gap-1 group" do %>
       <span class="icon-[lucide--user] text-2xl text-amber-500 transition-transform group-active:scale-95"></span>
-      <span class="text-[10px] font-bold text-neutral-700">マイページ</span>
+      <span class="text-[10px] font-bold text-amber-800">マイページ</span>
     <% end %>
   </div>
 </div>
