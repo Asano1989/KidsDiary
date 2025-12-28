@@ -1,12 +1,19 @@
-<div class="grid grid-cols-2 gap-2 items-center p-4 bg-sky-100">
-  <div class="text-left">
+<div class="grid grid-cols-3 gap-2 items-center p-4 bg-lime-300">
+  <div class="text-left col-span-2">
     <%=link_to image_tag('/tsumugi-logo.png', class: "max-h-[4dvh]"), root_path %>
   </div>
-  <div class="text-right">
+
+  <div>
     <% if logged_in? %>
-      <%= link_to 'ログアウト', logout_path, data: { turbo_method: :delete, turbo_confirm: "ログアウトしますか？" } %>
+      <%= link_to logout_path, data: { turbo_method: :delete, turbo_confirm: "ログアウトしますか？" }, class: "flex flex-col items-center gap-1 group" do %>
+        <span class="icon-[lucide--log-out] text-xl text-lime-700 transition-transform group-active:scale-95"></span>
+        <span class="text-[12px] font-bold text-lime-900">ログアウト</span>
+      <% end %>
     <% else %>
-      <%= link_to "ログイン・新規登録", auth_path %>
+      <%= link_to auth_path, data: { turbo: :false }, class: "flex flex-col items-center gap-1 group" do %>
+        <span class="icon-[lucide--log-in] text-xl text-lime-700 transition-transform group-active:scale-95"></span>
+        <span class="text-[12px] font-bold text-lime-900">ログイン・新規登録</span>
+      <% end %>
     <% end %>
   </div>
 </div>
