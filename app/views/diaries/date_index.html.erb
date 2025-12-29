@@ -1,15 +1,25 @@
-<div id="date_index" class="text-center">
-  <h1 class="text-3xl font-bold m-6"><%= l(@date.to_date, format: :long) %>の日記</h1>
+<div id="date_index" class="min-h-screen bg-lime-50 pb-20">
+  <div class="px-4 py-6">
+    <h1 class="text-2xl font-bold text-amber-900 text-center mb-6">
+      <%= l(@date.to_date, format: :long) %>の日記
+    </h1>
 
-  <% if @diaries.any? %>
-    <%= render @diaries %>
-  <% else %>
-    <div>
-      <p>日記はありません。</p>
+    <% if @diaries.any? %>
+      <div class="flex flex-col gap-4">
+        <%= render @diaries %>
+      </div>
+    <% else %>
+      <div class="flex flex-col items-center justify-center py-12">
+        <p class="text-muted-foreground text-center">日記はありません。</p>
+      </div>
+    <% end %>
+
+    <div class="mt-8 text-center">
+      <%= link_to diaries_path,
+          class: "inline-flex items-center justify-center px-6 py-3 rounded-lg bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity",
+          data: { turbo: false } do %>
+        カレンダーに戻る
+      <% end %>
     </div>
-  <% end %>
-
-  <div class="my-8">
-    <%= link_to "カレンダーに戻る", diaries_path, data: { turbo: false } %>
   </div>
 </div>
