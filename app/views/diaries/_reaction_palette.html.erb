@@ -1,17 +1,12 @@
-<%# リアクション追加のトリガーデザイン：モバイル向けに押しやすいサイズとスタイルに改善 %>
 <% my_reactions_count = diary.reactions.where(user_id: current_user.id).count %>
-
-<% if diary.user_id != current_user.id &&
-      diary.user.family_id == current_user.family_id &&
-      my_reactions_count < 5 %>
-  <details class="relative inline-block overflow-visible group">
-    <summary class="cursor-pointer outline-none">
-      <div class="inline-flex items-center justify-center w-8 h-8 border-2 border-dashed border-neutral-300 rounded-full text-neutral-400 transition-colors group-hover:border-amber-400 group-hover:text-amber-500">
-        <span class="icon-[lucide--plus] w-5 h-5"></span>
-      </div>
-    </summary>
-
-    <%# 絵文字リストのポップアップを表示 %>
-    <%= render 'emoji_list', diary: diary %>
-  </details>
-<% end %>
+  <% if diary.user_id != current_user.id && diary.user.family_id == current_user.family_id && my_reactions_count < 5 %>
+    <details class="relative inline-block overflow-visible group">
+      <!-- groupクラスを追加 -->
+      <summary class="list-none cursor-pointer flex items-center justify-center size-9 rounded-full bg-lime-100 border border-lime-300 text-lime-700 hover:bg-lime-200 transition-all shadow-sm active:scale-95">
+        <span class="icon-[lucide--plus] text-lg"></span>
+        <!-- アイコンに変更 -->
+      </summary>
+    
+      <%= render 'emoji_list', diary: diary %>
+    </details>
+  <% end %>
