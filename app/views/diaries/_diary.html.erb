@@ -1,53 +1,75 @@
-<div id="diary" class="w-2/3 justify-self-center relative transition">
-  <div class="flex flex-col m-4 border rounded-md">
-    <%# 1段目：絵文字（左寄せ） %>
-    <div class="flex justify-start p-4 relative z-10">
-      <%= link_to filter_diaries_path(child_ids: params[:child_ids], emoji_id: diary.emoji.id), data: { turbo: false } do %>
-        <%= diary.emoji.character %>
-      <% end %>
+<article id="diary_<%= diary.id %>" class="relative flex flex-col bg-white dark:bg-surface-dark rounded-xl p-5 shadow-soft border border-stone-100 dark:border-stone-800 transition-colors">
+
+  <!-- 絵文字 -->
+  <div class="absolute top-4 left-4 flex-shrink-0 z-10">
+    <div class="flex items-center justify-center size-16 rounded-full bg-amber-soft dark:bg-[#3d3220] text-4xl shadow-inner">
+      <%= diary.emoji.character %>
+    </div>
+  </div>
+
+  <!-- ヘッダー: ユーザー情報、投稿時間、子どもの情報 -->
+  <div class="flex items-start justify-end mb-2 pl-24">
+    <div class="flex flex-col flex-grow text-right mr-4">
+      <!-- 投稿ユーザー -->
+      <h3 class="font-bold text-base text-[#1c170d] dark:text-white leading-tight mb-1"><%= diary.user.name %></h3>
+      <!-- 投稿時間 -->
+      <p class="text-stone-400 dark:text-stone-500 text-xs font-medium mb-2">
+        <%= l(diary.created_at, format: :only_time) %>
+      </p>
+      <!-- 子どもの情報 -->
+      <div class="flex flex-wrap justify-end gap-2 py-1"> <!-- justify-endで右寄せに -->
+        <% diary.children.each do |child| %>
+          <span class="bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 text-sm font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+            <%= child.name %>
+          </span>
+        <% end %>
+      </div>
     </div>
 
-    <%# 2段目：カテゴリ、タグ %>
-    <div class="flex justify-start gap-2 px-6 relative z-10">
-      <% diary.children.each do |child| %>
-        <%
-          current_ids = Array.wrap(params[:child_ids]).map(&:to_s)
-          
-          if current_ids.include?(child.id.to_s)
-            # すでに選択済みなら、そのIDを取り除く（解除リンクになる）
-            next_ids = current_ids - [child.id.to_s]
-          else
-            # 未選択なら、IDを追加する
-            next_ids = current_ids + [child.id.to_s]
-          end
-        %>
-        <div class="border p-2">
-          <%= link_to child.name, filter_diaries_path(child_ids: next_ids, emoji_id: params[:emoji_id]), data: { turbo: false } %>
+    <!-- ユーザーアバター-->
+    <div class="flex-shrink-0">
+      <div class="relative">
+        <div class="size-12 rounded-full bg-gray-200 overflow-hidden ring-2 ring-primary/20">
+          <% if diary.user.avatar.attached? %>
+            <%= image_tag diary.user.avatar, class: "w-full h-full object-cover" %>
+          <% else %>
+            <img alt="<%= diary.user.name %> portrait" class="w-full h-full object-cover" src="https://via.placeholder.com/48/F5A30A/FFFFFF?text=<%= diary.user.name.first %>" />
+          <% end %>
         </div>
-      <% end %>
-      <div class="border p-2 relative z-10">タグ</div>
+      </div>
     </div>
+  </div>
 
-    <%# 3段目：ID、家族ID、家族名、ユーザー名 %>
-    <div class="flex justify-center m-2">
-      <div class="p-2">id：<%= diary.id %></div>
-      <div class="p-2">family_id：<%= diary.user.family_id %></div>
-      <div class="p-2">family name：<%= diary.user.family.name %></div>
-      <div class="p-2">user：<%= diary.user.name %></div>
-    </div>
-
-    <%# 4段目：本文 %>
-    <div class="flex justify-start m-2 px-4 py-2">
+  <!-- コンテンツ本体: 日記本文 -->
+  <div class="flex flex-col flex-1 mt-1">
+    <p class="text-[#4a4238] dark:text-[#dcd6ce] text-[15px] leading-relaxed font-normal whitespace-pre-wrap">
       <%= diary.body %>
-    </div>
+    </p>
+  </div>
 
+  <!-- フッター: タグとアクションボタン -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between mt-5 gap-4">
+    <!-- タグ -->
+    <!-- % if diary.tags.any? % -->
+      <div class="flex flex-wrap gap-2">
+        <!-- % diary.tags.each do |tag| % -->
+          <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-lime-100 dark:bg-lime-900/30 text-lime-800 dark:text-lime-200 transition-colors">
+            <span class="text-xs font-semibold"># タグ<%# = tag.name %></span>
+          </div>
+        <!-- % end % -->
+      </div>
+    <!-- % end % -->
+    
+    <!-- アクションボタン -->
     <% if diary.user != current_user %>
-    <div class="flex justify-end m-2 px-4 py-2">
-      <%= render 'reaction', diary: diary %>
-    </div>
+      <div class="flex items-center justify-end gap-1 border-t sm:border-t-0 border-stone-100 dark:border-stone-800 pt-3 sm:pt-0">
+        <%= render 'reaction', diary: diary %>
+      </div>
+    <% else %>
+      <div class="flex-1"></div>
     <% end %>
   </div>
-  <%= link_to "", diary_path(diary),
-      class: "absolute inset-0 z-0",
-      data: { turbo: false } %>
-</div>
+
+  <!-- ナビゲーション用のクリック可能なオーバーレイ-->
+  <%= link_to "", diary_path(diary), class: "absolute inset-0 z-0 rounded-2xl", data: { turbo: false } %>
+</article>
