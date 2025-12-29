@@ -3,7 +3,9 @@
   <!-- 絵文字 -->
   <div class="absolute top-4 left-4 flex-shrink-0 z-10">
     <div class="flex items-center justify-center size-16 rounded-full bg-amber-soft dark:bg-[#3d3220] text-4xl shadow-inner">
-      <%= diary.emoji.character %>
+      <%= link_to filter_diaries_path(child_ids: params[:child_ids], emoji_id: diary.emoji.id), data: { turbo: false } do %>
+        <%= diary.emoji.character %>
+      <% end %>
     </div>
   </div>
 
@@ -17,10 +19,21 @@
         <%= l(diary.created_at, format: :only_time) %>
       </p>
       <!-- 子どもの情報 -->
-      <div class="flex flex-wrap justify-end gap-2 py-1">
+      <div class="flex flex-wrap justify-end gap-2 py-1 z-10">
         <% diary.children.each do |child| %>
+          <%
+            current_ids = Array.wrap(params[:child_ids]).map(&:to_s)
+            
+            if current_ids.include?(child.id.to_s)
+              # すでに選択済みなら、そのIDを取り除く（解除リンクになる）
+              next_ids = current_ids - [child.id.to_s]
+            else
+              # 未選択なら、IDを追加する
+              next_ids = current_ids + [child.id.to_s]
+            end
+          %>
           <span class="bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 text-sm font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-            <%= child.name %>
+            <%= link_to child.name, filter_diaries_path(child_ids: next_ids, emoji_id: params[:emoji_id]), data: { turbo: false } %>
           </span>
         <% end %>
       </div>
@@ -67,5 +80,5 @@
   </div>
 
   <!-- ナビゲーション用のクリック可能なオーバーレイ-->
-  <%= link_to "", diary_path(diary), class: "absolute inset-0 z-0 rounded-2xl", data: { turbo: false } %>
+  <%= link_to "", diary_path(diary), class: "absolute inset-0 z-0", data: { turbo: false } %>
 </article>
