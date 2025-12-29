@@ -1,38 +1,40 @@
-<div class="flex flex-wrap gap-2 mt-4">
-  <div class="flex flex-wrap gap-2 mt-2">
-    <%# 日記に付いているリアクションを「絵文字ごと」にまとめてループ %>
+<div class="flex flex-wrap items-center gap-2 mt-4">
+  <div class="flex flex-wrap items-center gap-2">
+    <%# 1. すでに付いているリアクションを絵文字ごとにまとめて表示 %>
     <% diary.reactions.group(:emoji_id).count.each do |emoji_id, count| %>
       <%
         emoji = Emoji.find(emoji_id)
-        # 自分がこの日記の、この絵文字にリアクションしているか探す
         my_reaction = diary.reactions.find_by(emoji_id: emoji_id, user_id: current_user.id)
       %>
 
       <% if my_reaction %>
-        <%# 自分のリアクションなら、DELETEメソッドで削除リンクにする %>
+        <%# 自分のリアクション：Amber背景で強調 %>
         <%= link_to diary_reaction_path(diary, my_reaction),
                     data: { "turbo-method": :delete },
-                    class: "flex items-center gap-1 px-2 py-1 bg-blue-100 border border-blue-300 rounded-full transition hover:bg-red-50" do %>
-          <span><%= emoji.character %></span>
-          <span class="text-xs font-bold text-blue-700"><%= count %></span>
+                    class: "inline-flex items-center gap-1.5 px-3 py-1 bg-amber-100 border border-amber-300 rounded-full transition-all hover:bg-amber-200 active:scale-95" do %>
+          <span class="text-lg"><%= emoji.character %></span>
+          <span class="text-xs font-bold text-amber-800"><%= count %></span>
         <% end %>
       <% else %>
-        <%# 他人のリアクションなら、クリックしても何も起きない（または追加するリンクにする） %>
+        <%# 他人のリアクション：控えめなスタイル、クリックで追加 %>
         <%= button_to diary_reactions_path(diary, emoji_id: emoji_id),
                       method: :post,
-                      class: "flex items-center gap-1 px-2 py-1 bg-gray-50 border border-gray-200 rounded-full hover:bg-gray-200" do %>
-          <span><%= emoji.character %></span>
-          <span class="text-xs font-bold text-gray-500"><%= count %></span>
+                      class: "inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-neutral-200 rounded-full transition-all hover:bg-neutral-50 active:scale-95 shadow-sm" do %>
+          <span class="text-lg"><%= emoji.character %></span>
+          <span class="text-xs font-bold text-neutral-600"><%= count %></span>
         <% end %>
       <% end %>
     <% end %>
   </div>
 
-  <%# 2. リアクションのパレットを表示 %>
-  <%= render 'reaction_palette', diary: diary %>
+  <%# 2. リアクション追加パレット %>
+  <% if diary.user != current_user %>
+    <%= render 'reaction_palette', diary: diary %>
+  <% end %>
 
   <style>
-    /* 三角矢印を消すためのスタイル */
+    /* Detailsの三角矢印を非表示にするための共通スタイル */
     summary::-webkit-details-marker { display: none; }
+    summary { list-style: none; }
   </style>
 </div>
