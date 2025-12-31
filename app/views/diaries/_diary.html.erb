@@ -60,7 +60,7 @@
     </p>
   </div>
 
-  <!-- フッター: タグとアクションボタン -->
+  <!-- フッター: タグとリアクションボタン -->
   <div class="flex flex-col sm:flex-row sm:items-center justify-between mt-5 gap-4">
     <!-- タグ -->
     <!-- % if diary.tags.any? % -->
@@ -73,8 +73,8 @@
       </div>
     <!-- % end % -->
     
-    <!-- アクションボタン -->
-    <div class="flex items-center justify-end gap-1 border-t sm:border-t-0 border-stone-100 dark:border-stone-800 pt-3 sm:pt-0">
+    <!-- リアクションボタン -->
+    <div class="flex items-center justify-end gap-1 border-t sm:border-t-0 border-stone-100 dark:border-stone-800 pt-3 sm:pt-0 z-10">
       <%= render 'reaction', diary: diary %>
     </div>
   </div>

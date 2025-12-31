@@ -10,18 +10,33 @@ class ReactionsController < ApplicationController
         emoji_id: params[:emoji_id]
       )
       if @reaction.save
-        redirect_back fallback_location: diaries_path, notice: "リアクションしました"
+        render_reaction_stream
       else
-        redirect_back fallback_location: diaries_path, alert: "リアクションに失敗しました"
+        render_reaction_stream
+        # redirect_back fallback_location: diary_path(@diary), alert: "リアクションに失敗しました"
       end
     else
-      redirect_back fallback_location: diaries_path, alert: "自分自身の日記にはリアクションできません"
+      render turbo_stream: turbo_stream.replace(
+        "diary_#{@diary.id}_reaction_area",
+        render_to_string(partial: 'diaries/reaction', locals: { diary: @diary })
+      )
     end
   end
 
   def destroy
     @reaction = current_user.reactions.find(params[:id])
+    @diary = @reaction.diary
     @reaction.destroy
-    redirect_back fallback_location: diaries_path, notice: "リアクションを取り消しました"
+
+    render_reaction_stream
   end
+end
+
+private
+
+def render_reaction_stream
+  render turbo_stream: turbo_stream.replace(
+    "diary_#{@diary.id}_reaction_area",
+    render_to_string(partial: 'diaries/reaction', locals: { diary: @diary })
+  )
 end

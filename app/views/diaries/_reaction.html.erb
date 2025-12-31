@@ -1,3 +1,4 @@
+<%= turbo_frame_tag "diary_#{diary.id}_reaction_area" do %>
 <div class="flex flex-wrap gap-2 mt-4 items-center">
   <div class="flex flex-wrap gap-2">
     <%# 日記に付いているリアクションを「絵文字ごと」にまとめてループ %>
@@ -7,13 +8,13 @@
         my_reaction = diary.reactions.find_by(emoji_id: emoji_id, user_id: current_user.id) %>
       <% if my_reaction %>
       <%# 自分のリアクションなら、DELETEメソッドで削除リンクにする（アクティブなスタイル） %>
-        <%= link_to diary_reaction_path(diary, my_reaction), data: { "turbo-method": :delete }, class: "flex items-center gap-1 px-3 py-1.5 bg-rose-100 border border-rose-300 rounded-full transition-all hover:bg-rose-300 shadow-sm active:scale-95" do %>
+        <%= button_to diary_reaction_path(diary, my_reaction), method: :delete, data: { turbo_frame: "diary_#{diary.id}_reaction_area" }, class: "flex items-center gap-1 px-3 py-1.5 bg-rose-100 border border-rose-300 rounded-full transition-all hover:bg-rose-300 shadow-sm active:scale-95" do %>
           <span class="text-base"><%= emoji.character %></span>
           <span class="text-xs font-bold text-rose-800"><%= count %></span>
         <% end %>
       <% else %>
         <%# 他人のリアクション（または自分がまだしていないリアクション）なら、POSTメソッドで追加リンクにする（非アクティブなスタイル） %>
-        <%= button_to diary_reactions_path(diary, emoji_id: emoji.id), method: :post, class: "flex items-center gap-1 px-3 py-1.5 bg-amber-100 border border-amber-200 rounded-full transition-all hover:bg-amber-200 shadow-sm active:scale-95" do %>
+        <%= button_to diary_reactions_path(diary, emoji_id: emoji.id), method: :post,　data: { turbo_frame: "diary_#{diary.id}_reaction_area" }, class: "flex items-center gap-1 px-3 py-1.5 bg-amber-100 border border-amber-200 rounded-full transition-all hover:bg-amber-200 shadow-sm active:scale-95" do %>
           <span class="text-base"><%= emoji.character %></span>
           <span class="text-xs font-bold text-amber-700"><%= count %></span>
         <% end %>
@@ -22,5 +23,6 @@
   </div>
   
   <%# 2. リアクションのパレットを表示 %>
-  <%= render 'reaction_palette', diary: diary %>
+  <%= render 'diaries/reaction_palette', diary: diary %>
 </div>
+<% end %>
