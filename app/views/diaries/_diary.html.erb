@@ -1,7 +1,7 @@
-<article id="diary_<%= diary.id %>" class="relative flex flex-col bg-white dark:bg-surface-dark rounded-xl p-5 shadow-soft border border-stone-100 dark:border-stone-800 transition-colors">
+<article id="diary_<%= diary.id %>" class="relative flex flex-col bg-white dark:bg-surface-dark rounded-xl p-5 shadow-soft border border-stone-100 dark:border-stone-800 transition-colors z-0 hover:z-[1] transition-all">
 
   <!-- 絵文字 -->
-  <div class="absolute top-4 left-4 flex-shrink-0 z-10">
+  <div class="absolute top-4 left-4 flex-shrink-0 z-20">
     <div class="flex items-center justify-center size-16 rounded-full bg-amber-soft dark:bg-[#3d3220] text-4xl shadow-inner">
       <%= link_to filter_diaries_path(child_ids: params[:child_ids], emoji_id: diary.emoji.id), data: { turbo: false } do %>
         <%= diary.emoji.character %>
@@ -19,7 +19,7 @@
         <%= l(diary.created_at, format: :only_time) %>
       </p>
       <!-- 子どもの情報 -->
-      <div class="flex flex-wrap justify-end gap-2 py-1 z-10">
+      <div class="flex flex-wrap justify-end gap-2 py-1 z-20">
         <% diary.children.each do |child| %>
           <%
             current_ids = Array.wrap(params[:child_ids]).map(&:to_s)
@@ -74,11 +74,11 @@
     <!-- % end % -->
     
     <!-- リアクションボタン -->
-    <div class="flex items-center justify-end gap-1 border-t sm:border-t-0 border-stone-100 dark:border-stone-800 pt-3 sm:pt-0 z-10">
+    <div class="flex items-center justify-end gap-1 border-t sm:border-t-0 border-stone-100 dark:border-stone-800 pt-3 sm:pt-0 z-20">
       <%= render 'reaction', diary: diary %>
     </div>
   </div>
 
   <!-- ナビゲーション用のクリック可能なオーバーレイ-->
-  <%= link_to "", diary_path(diary), class: "absolute inset-0 z-0", data: { turbo: false } %>
+  <%= link_to "", diary_path(diary), class: "absolute inset-0 z-10", data: { turbo: false } %>
 </article>
