@@ -1,9 +1,31 @@
 <%= turbo_frame_tag "emoji_palette_#{diary.id}" do %>
-  <div class="absolute bottom-full left-0 mb-2 flex bg-white border shadow-xl rounded-lg p-2 gap-2 z-50 min-w-max items-center">
-    <% Emoji.order("RANDOM()").limit(6).each do |emoji| %>
-      <%= button_to emoji.character, diary_reactions_path(diary, emoji_id: emoji.id),
-                    method: :post, data: { turbo_frame: "_top" } %>
-    <% end %>
-    <%= link_to "↻", refresh_emoji_diary_path(diary), class: "ml-2 text-gray-400 hover:text-blue-500 text-sm" %>
+  <div class="fixed inset-0 z-80 bg-black/20 backdrop-blur-[2px]" 
+      onclick="this.closest('details').removeAttribute('open')"></div>
+
+  <%# パレット本体 %>
+  <div class="fixed bottom-0 left-0 right-0 mb-0 flex items-center justify-between bg-white border-t border-neutral-200 shadow-[0_-8px_30px_rgb(0,0,0,0.15)] rounded-t-3xl p-4 z-90 animate-in fade-in slide-in-from-bottom-full duration-300">
+    
+    <div class="flex items-center gap-3 overflow-x-auto pb-2 no-scrollbar">
+      <% Emoji.order("RANDOM()").limit(6).each do |emoji| %>
+        <%= button_to diary_reactions_path(diary, emoji_id: emoji.id),
+                      method: :post,
+                      data: {
+                        turbo_frame: "diary_#{diary.id}_reaction_area",
+                        turbo_stream: true
+                      },
+                      onclick: "this.closest('details').removeAttribute('open')",
+                      class: "w-10 h-10 flex items-center justify-center text-2xl rounded-2xl hover:bg-amber-50 active:scale-90 transition-all bg-neutral-50 border border-neutral-100" do %>
+          <%= emoji.character %>
+        <% end %>
+      <% end %>
+    </div>
+
+    <div class="flex items-center border-l border-neutral-200 pl-2 ml-1">
+      <%= link_to refresh_emoji_diary_path(diary),
+                  class: "w-10 h-10 flex items-center justify-center text-amber-700 hover:bg-amber-50 active:rotate-180 transition-all duration-500",
+                  title: "リフレッシュ" do %>
+        <span class="icon-[lucide--rotate-ccw] w-5 h-5"></span>
+      <% end %>
+    </div>
   </div>
 <% end %>

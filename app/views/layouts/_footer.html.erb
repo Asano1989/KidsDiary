@@ -9,20 +9,19 @@
 
     <%# 下段: 右寄せコピーライトとSNS %>
     <div class="flex flex-col items-end space-y-4 text-right">
-      <p class="text-sm text-lime-900">
-        &copy; <%= Time.current.year %> Omoide tsumugi.
-      </p>
-      
-      <div class="flex flex-row items-end items-center space-x-6">
-        <div id="x-link" class="basis-2xs self-center">
+      <div class="flex flex-row items-end space-x-6">
+        <div id="x-link" class="basis-2xs">
           <%= link_to root_path, class: "text-lime-900 transition-colors", aria: { label: "X (Twitter)" } do %>
-            <span class="icon-[lucide--twitter] text-3xl" aria-hidden="true"></span>
+            <span class="icon-[simple-icons--x] text-3xl" aria-hidden="true"></span>
           <% end %>
         </div>
         <div id="note-link" class="basis-2xs">
           <%= link_to image_tag('/note-logo.png'), root_path, aria: { label: "note" } %>
         </div>
       </div>
+      <p class="text-sm text-lime-900">
+        &copy; <%= Time.current.year %> Omoide tsumugi.
+      </p>
     </div>
   </div>
 </footer>

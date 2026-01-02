@@ -1,12 +1,17 @@
 <% my_reactions_count = diary.reactions.where(user_id: current_user.id).count %>
-<% if diary.user_id != current_user.id &&
-      diary.user.family_id == current_user.family_id &&
-      my_reactions_count < 5 %>
-  <details class="relative inline-block overflow-visible">
-    <summary class="list-none cursor-pointer">
-      <div class="px-3 py-1 border-2 border-dashed border-gray-300 rounded-full text-gray-400">＋</div>
+<% if diary.user_id != current_user.id && diary.user.family_id == current_user.family_id && my_reactions_count < 5 %>
+  <style>
+    #diary_<%= diary.id %>:has(details[open]) {
+      z-index: 50 !important;
+    }
+  </style>
+  <details class="relative inline-block overflow-visible group">
+    <!-- groupクラスを追加 -->
+    <summary class="list-none cursor-pointer flex items-center justify-center size-9 rounded-full bg-lime-100 border border-lime-300 text-lime-700 hover:bg-lime-200 transition-all shadow-sm active:scale-95">
+      <span class="icon-[lucide--plus] text-lg"></span>
+      <!-- アイコンに変更 -->
     </summary>
-
-    <%= render 'emoji_list', diary: diary %>
+  
+    <%= render 'diaries/emoji_list', diary: diary %>
   </details>
 <% end %>
