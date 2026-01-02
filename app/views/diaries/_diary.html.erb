@@ -18,25 +18,6 @@
       <p class="text-stone-400 dark:text-stone-500 text-xs font-medium mb-2">
         <%= l(diary.created_at, format: :only_time) %>
       </p>
-      <!-- 子どもの情報 -->
-      <div class="flex flex-wrap justify-end gap-2 py-1 z-20">
-        <% diary.children.each do |child| %>
-          <%
-            current_ids = Array.wrap(params[:child_ids]).map(&:to_s)
-            
-            if current_ids.include?(child.id.to_s)
-              # すでに選択済みなら、そのIDを取り除く（解除リンクになる）
-              next_ids = current_ids - [child.id.to_s]
-            else
-              # 未選択なら、IDを追加する
-              next_ids = current_ids + [child.id.to_s]
-            end
-          %>
-          <span class="bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 text-sm font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-            <%= link_to child.name, filter_diaries_path(child_ids: next_ids, emoji_id: params[:emoji_id]), data: { turbo: false } %>
-          </span>
-        <% end %>
-      </div>
     </div>
 
     <!-- ユーザーアバター-->
@@ -53,6 +34,26 @@
     </div>
   </div>
 
+  <!-- 子どもの情報 -->
+  <div class="flex flex-wrap justify-end gap-2 py-1 z-20">
+    <% diary.children.each do |child| %>
+      <%
+        current_ids = Array.wrap(params[:child_ids]).map(&:to_s)
+        
+        if current_ids.include?(child.id.to_s)
+          # すでに選択済みなら、そのIDを取り除く（解除リンクになる）
+          next_ids = current_ids - [child.id.to_s]
+        else
+          # 未選択なら、IDを追加する
+          next_ids = current_ids + [child.id.to_s]
+        end
+      %>
+      <span class="bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 text-sm font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+        <%= link_to child.name, filter_diaries_path(child_ids: next_ids, emoji_id: params[:emoji_id]), data: { turbo: false } %>
+      </span>
+    <% end %>
+  </div>
+
   <!-- コンテンツ本体: 日記本文 -->
   <div class="flex flex-col flex-1 mt-1">
     <p class="text-[#4a4238] dark:text-[#dcd6ce] text-[15px] leading-relaxed font-normal whitespace-pre-wrap">
@@ -61,7 +62,7 @@
   </div>
 
   <!-- フッター: タグとリアクションボタン -->
-  <div class="flex flex-col sm:flex-row sm:items-center justify-between mt-5 gap-4">
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between mt-4 gap-2">
     <!-- タグ -->
     <!-- % if diary.tags.any? % -->
       <div class="flex flex-wrap gap-2">
@@ -74,7 +75,7 @@
     <!-- % end % -->
     
     <!-- リアクションボタン -->
-    <div class="flex items-center justify-end gap-1 border-t sm:border-t-0 border-stone-100 dark:border-stone-800 pt-3 sm:pt-0 z-20">
+    <div class="flex items-center justify-end gap-1 z-20">
       <%= render 'reaction', diary: diary %>
     </div>
   </div>
