@@ -10,16 +10,15 @@ class ReactionsController < ApplicationController
         emoji_id: params[:emoji_id]
       )
       if @reaction.save
+        flash.now[:notice] = "リアクションを付けしました"
         render_reaction_stream
       else
+        flash.now[:notice] = "リアクション失敗しました"
         render_reaction_stream
-        # redirect_back fallback_location: diary_path(@diary), alert: "リアクションに失敗しました"
       end
     else
-      render turbo_stream: turbo_stream.replace(
-        "diary_#{@diary.id}_reaction_area",
-        render_to_string(partial: 'diaries/reaction', locals: { diary: @diary })
-      )
+      flash.now[:alert] = "自分自身の日記にはリアクションできません"
+      render_reaction_stream
     end
   end
 
@@ -28,15 +27,24 @@ class ReactionsController < ApplicationController
     @diary = @reaction.diary
     @reaction.destroy
 
+    flash.now[:notice] = "リアクションを取り消しました"
     render_reaction_stream
   end
-end
 
-private
+  private
 
-def render_reaction_stream
-  render turbo_stream: turbo_stream.replace(
-    "diary_#{@diary.id}_reaction_area",
-    render_to_string(partial: 'diaries/reaction', locals: { diary: @diary })
-  )
+  def render_reaction_stream
+    render turbo_stream: [
+      # 1. リアクションエリアを更新
+      turbo_stream.replace(
+        "diary_#{@diary.id}_reaction_area",
+        render_to_string(partial: 'diaries/reaction', locals: { diary: @diary })
+      ),
+      # 2. フラッシュメッセージエリアを更新
+      turbo_stream.update(
+        "flash_messages",
+        render_to_string(partial: 'shared/flash_messages')
+      )
+    ]
+  end
 end

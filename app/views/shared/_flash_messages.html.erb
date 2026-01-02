@@ -1,5 +1,31 @@
 <% flash.each do |message_type, message| %>
-  <div class="<%= flash_background_color(message_type) %> px-4 py-2 rounded-md">
-    <%= message %>
+  <div class="flex <%= flash_background_color(message_type) %> px-4 py-2 rounded-md pointer-events-auto">
+    <div class="flex-auto">
+      <%= message %>
+    </div>
+
+    <div>
+      <button onclick="this.closest('.pointer-events-auto').remove()" class="ml-4 hover:opacity-70 transition-opacity">
+        <span class="icon-[lucide--x] w-4 h-4"></span>
+      </button>
+    </div>
   </div>
 <% end %>
+
+<script>
+  (function() {
+    // 表示されたすべてのメッセージを取得
+    const messages = document.querySelectorAll("#flash_messages > div");
+    messages.forEach(msg => {
+      // 3秒後にアニメーションを開始し、その後削除
+      setTimeout(() => {
+        if (msg) {
+          msg.style.transition = "all 0.5s";
+          msg.style.opacity = "0";
+          msg.style.transform = "translateY(-10px)";
+          setTimeout(() => msg.remove(), 500);
+        }
+      }, 3000);
+    });
+  })();
+</script>
