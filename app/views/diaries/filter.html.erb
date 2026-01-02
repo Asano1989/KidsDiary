@@ -1,51 +1,56 @@
-<div id="filter_diaries" class="text-center">
-  <h1 class="text-3xl font-bold mt-6">日記を絞り込む</h1>
+<div id="filter_diaries" class="min-h-screen bg-lime-50 pb-20">
+  <div class="px-4 py-6">
+    <h1 class="text-2xl font-bold text-amber-900 text-center mb-6">日記を絞り込む</h1>
 
-  <div class="flex flex-wrap justify-center gap-2 my-6">
-    <% if @selected_children.present? || @selected_emoji.present? %>
-      
-      <% if @selected_children.present? %>
-        <%# --- 子どものバッジ表示 --- %>
-        <% @selected_children.each do |child| %>
-          <div class="flex items-center border border-blue-500 bg-blue-50 px-3 py-1 rounded-full text-blue-700 shadow-sm">
-            <%
-              remaining_child_ids = Array.wrap(params[:child_ids]) - [child.id.to_s]
-            %>
-            <%= link_to filter_diaries_path(child_ids: remaining_child_ids, emoji_id: params[:emoji_id]),
+    <div class="flex flex-wrap justify-center gap-2 my-6">
+      <% if @selected_children.present? || @selected_emoji.present? %>
+        
+        <% if @selected_children.present? %>
+          <%# --- 子どものバッジ表示 --- %>
+          <% @selected_children.each do |child| %>
+            <div class="flex items-center border border-blue-500 bg-blue-50 px-3 py-1 rounded-full text-blue-700 shadow-sm">
+              <%
+                remaining_child_ids = Array.wrap(params[:child_ids]) - [child.id.to_s]
+              %>
+              <%= link_to filter_diaries_path(child_ids: remaining_child_ids, emoji_id: params[:emoji_id]),
+                          data: { turbo: false }, class: "flex items-center hover:opacity-70" do %>
+                <span class="mr-1">✕</span>
+                <span><%= child.name %></span>
+              <% end %>
+            </div>
+          <% end %>
+        <% end %>
+        
+        <%# --- 絵文字のバッジ表示 --- %>
+        <% if @selected_emoji.present? %>
+          <div class="flex items-center border border-yellow-500 bg-yellow-50 px-3 py-1 rounded-full text-lg shadow-sm">
+            <%# クリックで絵文字を解除（emoji_idをnilにするが、child_idsは維持） %>
+            <%= link_to filter_diaries_path(child_ids: params[:child_ids], emoji_id: nil), 
                         data: { turbo: false }, class: "flex items-center hover:opacity-70" do %>
-              <span class="mr-1">✕</span>
-              <span><%= child.name %></span>
+              <span class="mr-2 text-sm text-yellow-700">✕</span>
+              <span><%= @selected_emoji.character %></span>
             <% end %>
           </div>
         <% end %>
+
+        <%# --- すべてクリアボタン（あると親切） --- %>
+        <div class="ml-4 flex items-center">
+          <%= link_to "クリア", filter_diaries_path, class: "text-sm text-gray-500 underline hover:text-gray-700" %>
+        </div>
+
       <% end %>
-      
-      <%# --- 絵文字のバッジ表示 --- %>
-      <% if @selected_emoji.present? %>
-        <div class="flex items-center border border-yellow-500 bg-yellow-50 px-3 py-1 rounded-full text-lg shadow-sm">
-          <%# クリックで絵文字を解除（emoji_idをnilにするが、child_idsは維持） %>
-          <%= link_to filter_diaries_path(child_ids: params[:child_ids], emoji_id: nil), 
-                      data: { turbo: false }, class: "flex items-center hover:opacity-70" do %>
-            <span class="mr-2 text-sm text-yellow-700">✕</span>
-            <span><%= @selected_emoji.character %></span>
-          <% end %>
+    </div>
+
+    <div class="diary-list">
+      <% if @diaries.any? %>
+        <div class="flex flex-col gap-4">
+          <%= render @diaries %>
+        </div>
+      <% else %>
+        <div class="flex flex-col items-center justify-center py-12">
+          <p class="text-muted-foreground text-center">該当する日記はありません。</p>
         </div>
       <% end %>
-
-      <%# --- すべてクリアボタン（あると親切） --- %>
-      <div class="ml-4 flex items-center">
-        <%= link_to "クリア", filter_diaries_path, class: "text-sm text-gray-500 underline hover:text-gray-700" %>
-      </div>
-
-    <% end %>
+    </div>
   </div>
-
-  <div class="diary-list">
-    <% if @diaries.any? %>
-      <%= render @diaries %>
-    <% else %>
-      <p>該当する日記はありません。</p>
-    <% end %>
-  </div>
-
 </div>
